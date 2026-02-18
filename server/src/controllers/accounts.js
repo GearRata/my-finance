@@ -29,10 +29,41 @@ export const create = async (req, res) => {
     }
 }
 
+export const update = async (req, res) => {
+    try {
+        const { id } = req.params;
+        const { name, balance, user_id } = req.body;
+
+        if (!id) {
+            return res.status(400).json({ message: 'Id is required' });
+        }
+        if (!name || !balance) {
+            return res.status(400).json({ message: 'Name and balance are required' });
+        }
+
+        // const { rows } = await client.query('SELECT * FROM goals WHERE id = $1', [id])
+
+        // Update account data
+        const { rows } = await client.query('UPDATE accounts SET name = $1, balance = $2, user_id = $3, updated_at = NOW() WHERE id = $4 RETURNING *', [name, balance, user_id, id]);
+        const updateAccount = rows[0];
+        if (!updateAccount) {
+            return res.status(400).json({ message: 'Account not found' })
+        }
+        res.send(updateAccount)
+    } catch (error) {
+
+    }
+}
+
 export const remove = async (req, res) => {
     try {
 
         const { id } = req.params;
+        if (!id) {
+            return res.status(400).json({ message: 'Id is required' });
+        }
+
+        // Delete account
         const { rows } = await client.query('DELETE FROM accounts WHERE id = $1 RETURNING *', [id]);
         const account = rows[0];
 
