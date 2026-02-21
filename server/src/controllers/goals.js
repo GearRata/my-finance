@@ -1,4 +1,5 @@
 import { client } from '../config/db.js'
+import cloudinary from '../../utils/cloudinary.js'
 
 export const list = async (req, res) => {
     try {
@@ -12,6 +13,7 @@ export const list = async (req, res) => {
 
 export const create = async (req, res) => {
     try {
+        // รับค่าข้อมูลทั่วไปจาก req.body (ชื่อเป้าหมาย ยอดเงิน)
         const { name, target_amount, current_amount, user_id } = req.body;
 
         if (!name || !target_amount || !user_id) {
@@ -19,9 +21,37 @@ export const create = async (req, res) => {
         }
 
         const currentAmount = current_amount || 0;
-        await client.query('INSERT INTO goals (name, target_amount, current_amount, user_id, created_at) VALUES ($1, $2, $3, $4, NOW())', [name, target_amount, currentAmount, user_id])
 
-        res.send('Created')
+        // 1. สร้าง Goal ก่อน และขอข้อมูลที่สร้างเสร็จกลับมา (RETURNING *) 
+        const { rows } = await client.query('INSERT INTO goals (name, target_amount, current_amount, user_id, created_at) VALUES ($1, $2, $3, $4, NOW()) RETURNING *',
+            [name, target_amount, currentAmount, user_id]
+        );
+
+        const newGoal = rows[0];
+
+        // 2. ตรวจสอบว่ามีไฟล์รูปถูกแนบมาด้วยไหม (ดึงจาก req.file ที่ได้มาจาก multer)
+        if (req.file) {
+            // อัปโหลดรูปนั้นขึ้น Cloudinary ก่อน
+            const result = await cloudinary.uploader.upload(req.file.path);
+
+            // นำข้อมูลที่ได้จาก Cloudinary (+ goal_id และ user_id) มาบันทึกลง Database ของเรา
+            await client.query(
+                `INSERT INTO images 
+                (goal_id, user_id, asset_id, public_id, url, secure_url, created_at) 
+                VALUES ($1, $2, $3, $4, $5, $6, NOW())`,
+                [
+                    newGoal.id,
+                    user_id,
+                    result.asset_id,
+                    result.public_id,
+                    result.url,
+                    result.secure_url
+                ]
+            );
+        }
+
+        // คืนค่า Goal ใหม่กลับไปให้ Frontend
+        res.status(201).json(newGoal);
 
     } catch (error) {
         console.log(error);
@@ -42,14 +72,13 @@ export const update = async (req, res) => {
             return res.status(400).json({ message: 'All field are required' })
         }
 
-        const { rows } = await client.query('SELECT * FROM goals WHERE id = $1', [id]);
-        const data = rows[0]
+        const { rows } = await client.query('UPDATE goals SET name = $1, target_amount = $2, current_amount = $3, user_id = $4, updated_at = NOW() WHERE id = $5 RETURNING *', [name, target_amount, current_amount, user_id, id]);
+        const data = rows[0];
 
         if (!data) {
             return res.status(404).json({ message: 'The Id to update was not found' })
         }
 
-        await client.query('UPDATE goals SET name = $1, target_amount = $2, current_amount = $3, user_id = $4, updated_at = NOW() WHERE id = $5 RETURNING *', [name, target_amount, current_amount, user_id, id]);
         res.send(rows);
     } catch (error) {
         console.log(error);
@@ -64,14 +93,14 @@ export const remove = async (req, res) => {
             return res.status(400).json({ message: 'Id is required' });
         }
 
-        const { rows } = await client.query('SELECT * FROM goals WHERE id = $1', [id]);
+        const { rows } = await client.query('DELETE FROM goals WHERE id = $1', [id]);
         const data = rows[0];
 
+        // if there is no data, it will return undefined.
         if (!data) {
             return res.status(404).json({ message: 'The Id to delete was not found' })
         }
 
-        await client.query('DELETE FROM goals WHERE id = $1', [id]);
         res.send('Deleted');
     } catch (error) {
         console.log(error);

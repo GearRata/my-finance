@@ -41,17 +41,16 @@ export const update = async (req, res) => {
             return res.status(400).json({ message: 'Name and balance are required' });
         }
 
-        // const { rows } = await client.query('SELECT * FROM goals WHERE id = $1', [id])
-
         // Update account data
         const { rows } = await client.query('UPDATE accounts SET name = $1, balance = $2, user_id = $3, updated_at = NOW() WHERE id = $4 RETURNING *', [name, balance, user_id, id]);
         const updateAccount = rows[0];
         if (!updateAccount) {
-            return res.status(400).json({ message: 'Account not found' })
+            return res.status(404).json({ message: 'Account not found' })
         }
         res.send(updateAccount)
     } catch (error) {
-
+        console.log(error);
+        res.status(500).json({ message: 'Internal server error' })
     }
 }
 
