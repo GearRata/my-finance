@@ -5,7 +5,7 @@ import { list, create, update, remove } from "../controllers/goals.js"
 
 const router = express.Router();
 
-router.get('/goals', list);
+router.get('/goals/:count', list);
 router.post('/goals', upload.single('image'), create);
 router.put('/goals/:id', update);
 router.delete('/goals/:id', remove);

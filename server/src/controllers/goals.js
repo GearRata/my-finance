@@ -1,18 +1,40 @@
 import { client } from '../config/db.js'
-import cloudinary from '../../utils/cloudinary.js'
 
 export const list = async (req, res) => {
     try {
-        const { rows } = await client.query('SELECT * FROM goals');
-        res.send(rows)
+        const { count } = req.params;
+
+        const query = `
+            SELECT
+                goals.*,
+                jsonb_build_object(
+                    'id', c.id,
+                    'name', c.name,
+                    'type', c.type,
+                    'created_at', c.created_at,
+                    'updated_at', c.updated_at
+                ) AS categories,
+                (
+                    SELECT COALESCE(jsonb_agg(i), '[]'::jsonb)
+                    FROM images i 
+                    WHERE i.goal_id = goals.id
+                ) AS images
+            FROM goals
+            LEFT JOIN categories c ON goals.category_id = c.id
+            ORDER BY goals.created_at DESC
+            LIMIT $1
+        `;
+        const { rows } = await client.query(query, [count])
+        res.json(rows);
     } catch (error) {
         console.log(error);
         res.status(500).json({ message: 'Internal server error' });
     }
 }
+
 export const create = async (req, res) => {
     try {
-        const { name, target_amount, current_amount, user_id, images } = req.body;
+        const { name, target_amount, current_amount, user_id, category_id, images } = req.body;
 
         if (!name || !target_amount || !user_id) {
             return res.status(400).json({ message: 'Name and target amount are required' })
@@ -21,8 +43,8 @@ export const create = async (req, res) => {
         const currentAmount = current_amount || 0;
 
         const { rows } = await client.query(
-            'INSERT INTO goals (name, target_amount, current_amount, user_id, created_at) VALUES ($1, $2, $3, $4, NOW()) RETURNING *',
-            [name, target_amount, currentAmount, user_id]
+            'INSERT INTO goals (name, target_amount, current_amount, user_id, category_id, created_at) VALUES ($1, $2, $3, $4, $5, NOW()) RETURNING *',
+            [name, target_amount, currentAmount, user_id, category_id]
         );
 
         const newGoal = rows[0];

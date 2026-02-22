@@ -1,0 +1,38 @@
+version: '3.8'
+services:
+  postgres:
+    image: postgres:latest # To download the latest image
+    container_name: postgres # Name of the container
+    restart: always
+    shm_size: 128mb # set shared memory limit when using docker compose
+    environment:
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+      - POSTGRES_DB=${POSTGRES_DB}
+    ports:
+      - "5433:5432" # HOST_PORT:CONTAINER_PORT (เครื่องเราเข้าผ่าน 5433, ใน container คือ 5432)
+    volumes:
+      - postgres-data:/var/lib/postgresql # The defined VOLUME was changed in 18 and above to /var/lib/postgresql
+
+  backend:
+    build: . # สร้าง Image จาก Dockerfile ในโฟลเดอร์ปัจจุบัน
+    container_name: backend # ตั้งชื่อ Container ว่า backend
+    restart: always
+    ports:
+      - "5000:5000"
+    volumes:
+      - .:/app # Volume Mapping: เชื่อมโฟลเดอร์เครื่องเรา เข้ากับ /app ใน Container (เพื่อ Hot Reload)
+      - /app/node_modules # (Tricky) บอกว่า node_modules ให้ใช้ของ Container นะ (อย่าเอาของเครื่องเราไปทับ)
+    environment:
+      # ส่งตัวแปร env เข้าไปใน Container (ต้องตรงกับที่ db.js เรียกใช้)
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+      - POSTGRES_DB=${POSTGRES_DB}
+      - POSTGRES_PORT=5432 # (Important) Port ใน network ของ docker คือ 5432 เสมอ
+      - POSTGRES_HOST=postgres # (Important) Host ต้องเป็นชื่อ Service "postgres" ไม่ใช่ localhost
+      - JWT_SECRET=${JWT_SECRET}
+    depends_on:
+      - postgres # บอกว่า backend ต้องรอให้ postgres รันก่อนนะ
+
+volumes:
+  postgres-data:
