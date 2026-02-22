@@ -10,11 +10,9 @@ export const list = async (req, res) => {
         res.status(500).json({ message: 'Internal server error' });
     }
 }
-
 export const create = async (req, res) => {
     try {
-        // รับค่าข้อมูลทั่วไปจาก req.body (ชื่อเป้าหมาย ยอดเงิน)
-        const { name, target_amount, current_amount, user_id } = req.body;
+        const { name, target_amount, current_amount, user_id, images } = req.body;
 
         if (!name || !target_amount || !user_id) {
             return res.status(400).json({ message: 'Name and target amount are required' })
@@ -22,32 +20,31 @@ export const create = async (req, res) => {
 
         const currentAmount = current_amount || 0;
 
-        // 1. สร้าง Goal ก่อน และขอข้อมูลที่สร้างเสร็จกลับมา (RETURNING *) 
-        const { rows } = await client.query('INSERT INTO goals (name, target_amount, current_amount, user_id, created_at) VALUES ($1, $2, $3, $4, NOW()) RETURNING *',
+        const { rows } = await client.query(
+            'INSERT INTO goals (name, target_amount, current_amount, user_id, created_at) VALUES ($1, $2, $3, $4, NOW()) RETURNING *',
             [name, target_amount, currentAmount, user_id]
         );
 
         const newGoal = rows[0];
 
-        // 2. ตรวจสอบว่ามีไฟล์รูปถูกแนบมาด้วยไหม (ดึงจาก req.file ที่ได้มาจาก multer)
-        if (req.file) {
-            // อัปโหลดรูปนั้นขึ้น Cloudinary ก่อน
-            const result = await cloudinary.uploader.upload(req.file.path);
+        if (images && Array.isArray(images) && images.length > 0) {
+            const imagePromises = images.map((item) => {
+                return client.query(
+                    `INSERT INTO images 
+                    (goal_id, user_id, asset_id, public_id, url, secure_url, created_at) 
+                    VALUES ($1, $2, $3, $4, $5, $6, NOW())`,
+                    [
+                        newGoal.id,
+                        user_id,
+                        item.asset_id,
+                        item.public_id,
+                        item.url,
+                        item.secure_url
+                    ]
+                );
+            });
 
-            // นำข้อมูลที่ได้จาก Cloudinary (+ goal_id และ user_id) มาบันทึกลง Database ของเรา
-            await client.query(
-                `INSERT INTO images 
-                (goal_id, user_id, asset_id, public_id, url, secure_url, created_at) 
-                VALUES ($1, $2, $3, $4, $5, $6, NOW())`,
-                [
-                    newGoal.id,
-                    user_id,
-                    result.asset_id,
-                    result.public_id,
-                    result.url,
-                    result.secure_url
-                ]
-            );
+            await Promise.all(imagePromises);
         }
 
         // คืนค่า Goal ใหม่กลับไปให้ Frontend
@@ -58,6 +55,7 @@ export const create = async (req, res) => {
         res.status(500).json({ message: 'Internal server error' });
     }
 }
+
 
 export const update = async (req, res) => {
     try {
