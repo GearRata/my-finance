@@ -5,6 +5,7 @@ import authRoutes from "./routes/auth.js"
 import categoriesRoutes from "./routes/categories.js"
 import accountsRoutes from "./routes/accounts.js"
 import goalsRoutes from "./routes/goals.js"
+import transactionRoutes from "./routes/transcations.js"
 import { connectDB } from './config/db.js'
 
 
@@ -24,6 +25,7 @@ app.use('/api', authRoutes);
 app.use('/api', categoriesRoutes);
 app.use('/api', accountsRoutes);
 app.use('/api', goalsRoutes);
+app.use('/api', transactionRoutes);
 
 
 

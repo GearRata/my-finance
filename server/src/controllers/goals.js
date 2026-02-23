@@ -15,6 +15,8 @@ export const list = async (req, res) => {
                     'updated_at', c.updated_at
                 ) AS categories,
                 (
+                    -- COALESCE ถ้ามีข้อมูลจะใช้ค่านั้น แต่ถ้าหากข้อมูลนั้นเป็น NULL จะไปใช้ข้อมูลถัดไป
+                    -- jsonb_agg รวบรวมค่าทั้งหมดรวมถึง null ลงใน JSON array
                     SELECT COALESCE(jsonb_agg(i), '[]'::jsonb)
                     FROM images i 
                     WHERE i.goal_id = goals.id
@@ -69,7 +71,6 @@ export const create = async (req, res) => {
             await Promise.all(imagePromises);
         }
 
-        // คืนค่า Goal ใหม่กลับไปให้ Frontend
         res.status(201).json(newGoal);
 
     } catch (error) {

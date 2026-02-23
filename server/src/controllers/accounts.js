@@ -22,7 +22,7 @@ export const create = async (req, res) => {
         // Create new Account
         await client.query('INSERT INTO accounts (name, balance, user_id, created_at) VALUES ($1, $2, $3, NOW())', [name, balance, user_id])
 
-        res.send('Create Account');
+        res.status(201).json({ message: 'Created' })
     } catch (error) {
         console.log(error);
         res.status(500).json({ message: 'Internal server error' })
