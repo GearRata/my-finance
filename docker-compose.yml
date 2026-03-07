@@ -21,9 +21,10 @@ services:
     ports:
       - "5000:5000"
     volumes:
-      - .:/app
-      - /app/node_modules
+      - .:/app # Volume Mapping: เชื่อมโฟลเดอร์เครื่องเรา เข้ากับ /app ใน Container (เพื่อ Hot Reload)
+      - /app/node_modules # (Tricky) บอกว่า node_modules ให้ใช้ของ Container 
     environment:
+      # ส่งตัวแปร env เข้าไปใน Container 
       - POSTGRES_USER=${POSTGRES_USER}
       - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
       - POSTGRES_DB=${POSTGRES_DB}
