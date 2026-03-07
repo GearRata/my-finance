@@ -46,7 +46,11 @@ export const login = async (req, res) => {
         const { rows } = await client.query('SELECT * FROM users WHERE email = $1', [email]);
         const user = rows[0];
         if (!user) {
-            return res.status(400).json({ message: 'User not found' })
+            return res.status(404).json({ message: 'User not found' })
+        }
+
+        if (!user.enabled) {
+            return res.status(400).json({ message: 'User not enabled' })
         }
 
         // Check if password is correct
@@ -61,7 +65,7 @@ export const login = async (req, res) => {
             email: user.email,
         }
 
-        jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: '1h' }, (err, token) => {
+        jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: '5h' }, (err, token) => {
             if (err) {
                 return res.status(500).json({ message: 'Internal server error' });
             }
