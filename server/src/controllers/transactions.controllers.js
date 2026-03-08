@@ -1,11 +1,10 @@
 import { client } from "../config/db.js";
 
-
 export const list = async (req, res) => {
-    try {
-        const { count } = req.params;
+  try {
+    const { count } = req.params;
 
-        const query = `
+    const query = `
             SELECT 
                 t.*,
                 jsonb_build_object(
@@ -30,23 +29,25 @@ export const list = async (req, res) => {
             LIMIT $1
         `;
 
-        const { rows } = await client.query(query, [count]);
-        res.send(rows)
-    } catch (error) {
-        console.log(error);
-        res.status(500).json({ message: 'Internal server error' })
-    }
-}
+    const { rows } = await client.query(query, [count]);
+    res.send(rows);
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ message: "Internal server error" });
+  }
+};
 
 export const create = async (req, res) => {
-    try {
-        const { amount, note, user_id, account_id, category_id } = req.body;
+  try {
+    const user_id = req.user.id;
+    const { amount, note, account_id, category_id, transaction_date } =
+      req.body;
 
-        if (!amount) {
-            return res.status(400).json({ message: 'Amount is required' });
-        }
+    if (!amount) {
+      return res.status(400).json({ message: "Amount is required" });
+    }
 
-        const query = `
+    const query = `
             INSERT INTO 
                 transactions (
                     amount, 
@@ -59,57 +60,101 @@ export const create = async (req, res) => {
                 ) 
             VALUES (
                 $1, $2, $3, $4, $5, NOW(), NOW()) RETURNING *
-            `
+            `;
 
-        const { rows } = await client.query(query, [amount, note, user_id, account_id, category_id,])
+    const { rows } = await client.query(query, [
+      amount,
+      note,
+      user_id,
+      account_id,
+      category_id,
+    ]);
 
-
-        res.status(201).json(rows)
-    } catch (error) {
-        console.log(error);
-        res.status(500).json({ message: 'Internal server error' })
-    }
-}
+    res.status(201).json(rows);
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ message: "Internal server error" });
+  }
+};
 
 export const update = async (req, res) => {
-    try {
-        res.send('updated')
-    } catch (error) {
-        console.log(error);
-        res.status(500).json({ message: 'Internal server error' })
-    }
-}
+  try {
+    const { id } = req.params;
+    const { amount, note, user_id, account_id, category_id, transaction_date } =
+      req.body;
+
+    const query = `
+            UPDATE
+                transactions
+            SET
+                amount = $1,
+                note = $2,
+                user_id = $3,
+                account_id = $4,
+                category_id = $5,
+                transaction_date = $6,
+                updated_at = NOW()
+            WHERE
+                id = $7
+            RETURNING *
+        `;
+
+    const { rows } = await client.query(query, [
+      amount,
+      note,
+      user_id,
+      account_id,
+      category_id,
+      transaction_date,
+      id,
+    ]);
+    res.json({ message: "ok", data: rows });
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ message: "Internal server error" });
+  }
+};
 
 export const remove = async (req, res) => {
-    try {
-        res.send('deleted')
-    } catch (error) {
-        console.log(error);
-        res.status(500).json({ message: 'Internal server error' })
-    }
-}
+  try {
+    const { id } = req.params;
+    const query = `
+        DELETE FROM
+           transactions
+         WHERE
+            id = $1
+        `;
+
+    const { rows } = await client.query(query, [id]);
+
+    res.json({ message: "A Transaction is delete" });
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ message: "Internal server error" });
+  }
+};
 
 export const listby = async (req, res) => {
-    try {
-        const { sort, order, limit } = req.body;
-        const query = `
+  try {
+    const { sort, order, limit } = req.body;
+    const query = `
             SELECT 
                 *
             FROM transactions
             ORDER BY ${sort} ${order.toUpperCase()}
             LIMIT $1
-        `
-        const { rows } = await client.query(query, [limit]);
-        res.send(rows);
-    } catch (error) {
-        console.log(error);
-        res.status(500).json({ message: 'Internal server error' })
-    }
-}
+        `;
+    const { rows } = await client.query(query, [limit]);
+    res.send(rows);
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ message: "Internal server error" });
+  }
+};
 
 const handleName = async (req, res, name) => {
-    try {
-        const query = `
+  try {
+    const query = `
            SELECT
                 t.*,
                 jsonb_build_object(
@@ -128,18 +173,18 @@ const handleName = async (req, res, name) => {
             WHERE t.note ILIKE $1
             ORDER BY t.created_at DESC
         `;
-        const { rows } = await client.query(query, [`%${name}%`]);
-        res.send(rows);
-    } catch (error) {
-        console.log(error);
-        res.status(500).json({ message: 'Search Error' });
-    }
-}
+    const { rows } = await client.query(query, [`%${name}%`]);
+    res.send(rows);
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ message: "Search Error" });
+  }
+};
 
 const handleAmount = async (req, res, amount) => {
-    try {
-        // amount เป็น array [min, max] เช่น [1000, 5000]
-        const query = `
+  try {
+    // amount เป็น array [min, max] เช่น [1000, 5000]
+    const query = `
             SELECT
                 t.*,
                 jsonb_build_object(
@@ -160,18 +205,17 @@ const handleAmount = async (req, res, amount) => {
             ORDER BY
                 t.amount DESC
         `;
-        const { rows } = await client.query(query, [amount[0], amount[1]]);
-        res.send(rows);
-    } catch (error) {
-        console.log(error);
-        res.status(500).json({ message: 'Search Error' });
-    }
-}
+    const { rows } = await client.query(query, [amount[0], amount[1]]);
+    res.send(rows);
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ message: "Search Error" });
+  }
+};
 
 const handleCategory = async (req, res, category) => {
-    try {
-
-        const query = `
+  try {
+    const query = `
             SELECT
                 t.*,
                 jsonb_build_object(
@@ -192,37 +236,33 @@ const handleCategory = async (req, res, category) => {
             ORDER BY
                 t.created_at DESC
         `;
-        const { rows } = await client.query(query, [category]);
-        res.send(rows);
-    } catch (error) {
-        console.log(error);
-        res.status(500).json({ message: 'Search Error' });
-    }
-}
-
-
+    const { rows } = await client.query(query, [category]);
+    res.send(rows);
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ message: "Search Error" });
+  }
+};
 
 export const searchFilter = async (req, res) => {
-    try {
-        const { name, category, amount } = req.body;
-        console.log(req.body)
+  try {
+    const { name, category, amount } = req.body;
+    console.log(req.body);
 
-
-        if (name) {
-            console.log('Query --->', name);
-            await handleName(req, res, name);
-        }
-        if (category) {
-            console.log('category --->', category);
-            await handleCategory(req, res, category)
-
-        }
-        if (amount) {
-            console.log('amount --->', amount);
-            await handleAmount(req, res, amount);
-        }
-    } catch (error) {
-        console.log(error);
-        res.status(500).json({ message: 'Internal server error' });
+    if (name) {
+      console.log("Query --->", name);
+      await handleName(req, res, name);
     }
-}
+    if (category) {
+      console.log("category --->", category);
+      await handleCategory(req, res, category);
+    }
+    if (amount) {
+      console.log("amount --->", amount);
+      await handleAmount(req, res, amount);
+    }
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ message: "Internal server error" });
+  }
+};

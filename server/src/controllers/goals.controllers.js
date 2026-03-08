@@ -1,10 +1,10 @@
-import { client } from '../config/db.js'
+import { client } from "../config/db.js";
 
 export const list = async (req, res) => {
-    try {
-        const { count } = req.params;
+  try {
+    const { count } = req.params;
 
-        const query = `
+    const query = `
             SELECT
                 goals.*,
                 jsonb_build_object(
@@ -26,24 +26,23 @@ export const list = async (req, res) => {
             ORDER BY goals.created_at DESC
             LIMIT $1
         `;
-        const { rows } = await client.query(query, [count])
-        res.send(rows);
-    } catch (error) {
-        console.log(error);
-        res.status(500).json({ message: 'Internal server error' });
-    }
-}
+    const { rows } = await client.query(query, [count]);
+    res.send(rows);
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ message: "Internal server error" });
+  }
+};
 
 export const read = async (req, res) => {
-    try {
-        const { id } = req.params;
+  try {
+    const { id } = req.params;
 
+    if (!id) {
+      return res.status(400).json({ message: "Id is required" });
+    }
 
-        if (!id) {
-            return res.status(400).json({ message: 'Id is required' });
-        }
-
-        const query = `
+    const query = `
             SELECT
                 goals.*,
                 jsonb_build_object(
@@ -65,25 +64,29 @@ export const read = async (req, res) => {
             WHERE
                 goals.id = $1
         `;
-        const { rows } = await client.query(query, [id])
-        res.send(rows);
-    } catch (error) {
-        console.log(error);
-        res.status(500).json({ message: 'Internal server error' });
-    }
-}
+    const { rows } = await client.query(query, [id]);
+    res.send(rows);
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ message: "Internal server error" });
+  }
+};
 
 export const create = async (req, res) => {
-    try {
-        const { name, target_amount, current_amount, user_id, category_id, images } = req.body;
+  try {
+    const user_id = req.user.id;
+    const { name, target_amount, current_amount, category_id, images } =
+      req.body;
 
-        if (!name || !target_amount || !user_id) {
-            return res.status(400).json({ message: 'Name and target amount are required' })
-        }
+    if (!name || !target_amount || !user_id) {
+      return res
+        .status(400)
+        .json({ message: "Name and target amount are required" });
+    }
 
-        const currentAmount = current_amount || 0;
+    const currentAmount = current_amount || 0;
 
-        const query = `
+    const query = `
             INSERT INTO 
                 goals (
                     name, 
@@ -96,14 +99,20 @@ export const create = async (req, res) => {
             VALUES ($1, $2, $3, $4, $5, NOW()) RETURNING *
             `;
 
-        const { rows } = await client.query(query, [name, target_amount, currentAmount, user_id, category_id]);
+    const { rows } = await client.query(query, [
+      name,
+      target_amount,
+      currentAmount,
+      user_id,
+      category_id,
+    ]);
 
-        const newGoal = rows[0];
+    const newGoal = rows[0];
 
-        if (images && Array.isArray(images) && images.length > 0) {
-            const imagePromises = images.map((item) => {
-                return client.query(
-                    `
+    if (images && Array.isArray(images) && images.length > 0) {
+      const imagePromises = images.map((item) => {
+        return client.query(
+          `
                     INSERT INTO 
                         images (
                             goal_id, 
@@ -116,54 +125,59 @@ export const create = async (req, res) => {
                         ) 
                     VALUES ($1, $2, $3, $4, $5, $6, NOW())
                     `,
-                    [
-                        newGoal.id,
-                        user_id,
-                        item.asset_id,
-                        item.public_id,
-                        item.url,
-                        item.secure_url
-                    ]
-                );
-            });
+          [
+            newGoal.id,
+            user_id,
+            item.asset_id,
+            item.public_id,
+            item.url,
+            item.secure_url,
+          ],
+        );
+      });
 
-            await Promise.all(imagePromises);
-        }
-
-        res.status(201).json(newGoal);
-
-    } catch (error) {
-        console.log(error);
-        res.status(500).json({ message: 'Internal server error' });
+      await Promise.all(imagePromises);
     }
-}
 
+    res.status(201).json(newGoal);
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ message: "Internal server error" });
+  }
+};
 
 export const update = async (req, res) => {
-    try {
-        const { id } = req.params;
-        const { name, target_amount, current_amount, user_id, category_id, images } = req.body;
+  try {
+    const { id } = req.params;
+    const {
+      name,
+      target_amount,
+      current_amount,
+      user_id,
+      category_id,
+      images,
+    } = req.body;
 
-        if (!id) {
-            return res.status(400).json({ message: 'Id is required' })
-        }
+    if (!id) {
+      return res.status(400).json({ message: "Id is required" });
+    }
 
-        if (!name || !target_amount || !user_id || !current_amount) {
-            return res.status(400).json({ message: 'All field are required' })
-        }
+    if (!name || !target_amount || !user_id || !current_amount) {
+      return res.status(400).json({ message: "All field are required" });
+    }
 
-
-        // clear images
-        await client.query(`
+    // clear images
+    await client.query(
+      `
             DELETE FROM
                 images
             WHERE 
                 goal_id = $1
             `,
-            [id]
-        );
+      [id],
+    );
 
-        const query = `
+    const query = `
             UPDATE 
                 goals 
             SET
@@ -178,14 +192,21 @@ export const update = async (req, res) => {
             RETURNING *
         `;
 
-        const { rows } = await client.query(query, [name, target_amount, current_amount, user_id, category_id, id]);
+    const { rows } = await client.query(query, [
+      name,
+      target_amount,
+      current_amount,
+      user_id,
+      category_id,
+      id,
+    ]);
 
-        const updateGoal = rows[0];
+    const updateGoal = rows[0];
 
-        if (images && Array.isArray(images) && images.length > 0) {
-            const imagesPromises = images.map((item) => {
-                return client.query(
-                    `
+    if (images && Array.isArray(images) && images.length > 0) {
+      const imagesPromises = images.map((item) => {
+        return client.query(
+          `
                     INSERT INTO 
                         images (
                             asset_id,
@@ -198,46 +219,49 @@ export const update = async (req, res) => {
                         ) 
                     VALUES ($1, $2, $3, $4, $5, $6, NOW())
                     `,
-                    [
-                        item.asset_id,
-                        item.public_id,
-                        item.url,
-                        item.secure_url,
-                        updateGoal.id,
-                        user_id
-                    ]
-                );
-            });
+          [
+            item.asset_id,
+            item.public_id,
+            item.url,
+            item.secure_url,
+            updateGoal.id,
+            user_id,
+          ],
+        );
+      });
 
-            await Promise.all(imagesPromises);
-        }
-
-
-        res.status(200).json(updateGoal);
-    } catch (error) {
-        console.log(error);
-        res.status(500).json({ message: 'Internal server error' });
+      await Promise.all(imagesPromises);
     }
-}
+
+    res.status(200).json(updateGoal);
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ message: "Internal server error" });
+  }
+};
 
 export const remove = async (req, res) => {
-    try {
-        const { id } = req.params;
-        if (!id) {
-            return res.status(400).json({ message: 'Id is required' });
-        }
-
-        const { rows } = await client.query('DELETE FROM goals WHERE id = $1', [id]);
-        const data = rows[0];
-
-        // if there is no data, it will return undefined.
-        if (!data) {
-            return res.status(404).json({ message: 'The Id to delete was not found' })
-        }
-
-        res.send('Deleted');
-    } catch (error) {
-        console.log(error);
-        res.status(500).json({ message: 'Internal server error' });
+  try {
+    const { id } = req.params;
+    if (!id) {
+      return res.status(400).json({ message: "Id is required" });
     }
-}
+
+    const { rows } = await client.query("DELETE FROM goals WHERE id = $1", [
+      id,
+    ]);
+    const data = rows[0];
+
+    // if there is no data, it will return undefined.
+    if (!data) {
+      return res
+        .status(404)
+        .json({ message: "The Id to delete was not found" });
+    }
+
+    res.send("Deleted");
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ message: "Internal server error" });
+  }
+};
