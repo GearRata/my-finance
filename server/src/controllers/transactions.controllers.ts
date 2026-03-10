@@ -1,6 +1,7 @@
+import type { Request, Response } from "express";
 import { client } from "../config/db.js";
 
-export const list = async (req, res) => {
+export const list = async (req: Request, res: Response) => {
   try {
     const { count } = req.params;
 
@@ -37,7 +38,7 @@ export const list = async (req, res) => {
   }
 };
 
-export const create = async (req, res) => {
+export const create = async (req: Request, res: Response) => {
   try {
     const user_id = req.user.id;
     const { amount, note, account_id, category_id, transaction_date } =
@@ -77,7 +78,7 @@ export const create = async (req, res) => {
   }
 };
 
-export const update = async (req, res) => {
+export const update = async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
     const { amount, note, user_id, account_id, category_id, transaction_date } =
@@ -115,7 +116,7 @@ export const update = async (req, res) => {
   }
 };
 
-export const remove = async (req, res) => {
+export const remove = async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
     const query = `
@@ -134,7 +135,7 @@ export const remove = async (req, res) => {
   }
 };
 
-export const listby = async (req, res) => {
+export const listby = async (req: Request, res: Response) => {
   try {
     const { sort, order, limit } = req.body;
     const query = `
@@ -152,7 +153,7 @@ export const listby = async (req, res) => {
   }
 };
 
-const handleName = async (req, res, name) => {
+const handleName = async (req: Request, res: Response, name: string) => {
   try {
     const query = `
            SELECT
@@ -181,7 +182,7 @@ const handleName = async (req, res, name) => {
   }
 };
 
-const handleAmount = async (req, res, amount) => {
+const handleAmount = async (req: Request, res: Response, amount: number[]) => {
   try {
     // amount เป็น array [min, max] เช่น [1000, 5000]
     const query = `
@@ -213,7 +214,11 @@ const handleAmount = async (req, res, amount) => {
   }
 };
 
-const handleCategory = async (req, res, category) => {
+const handleCategory = async (
+  req: Request,
+  res: Response,
+  category: number[],
+) => {
   try {
     const query = `
             SELECT
@@ -244,7 +249,7 @@ const handleCategory = async (req, res, category) => {
   }
 };
 
-export const searchFilter = async (req, res) => {
+export const searchFilter = async (req: Request, res: Response) => {
   try {
     const { name, category, amount } = req.body;
     console.log(req.body);

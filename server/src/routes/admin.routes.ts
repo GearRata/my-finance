@@ -1,5 +1,5 @@
 import express from "express";
-import { authCheck, adminCheck } from "../../middleware/authCheck.js";
+import { authCheck, adminCheck } from "../middleware/authCheck.js";
 import {
   listUsers,
   changeStatus,

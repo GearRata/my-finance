@@ -1,6 +1,7 @@
+import type { Request, Response } from "express";
 import { client } from "../config/db.js";
 
-export const list = async (req, res) => {
+export const list = async (req: Request, res: Response) => {
   try {
     const { count } = req.params;
 
@@ -34,7 +35,7 @@ export const list = async (req, res) => {
   }
 };
 
-export const read = async (req, res) => {
+export const read = async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
 
@@ -72,7 +73,7 @@ export const read = async (req, res) => {
   }
 };
 
-export const create = async (req, res) => {
+export const create = async (req: Request, res: Response) => {
   try {
     const user_id = req.user.id;
     const { name, target_amount, current_amount, category_id, images } =
@@ -146,7 +147,7 @@ export const create = async (req, res) => {
   }
 };
 
-export const update = async (req, res) => {
+export const update = async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
     const {
@@ -240,7 +241,7 @@ export const update = async (req, res) => {
   }
 };
 
-export const remove = async (req, res) => {
+export const remove = async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
     if (!id) {

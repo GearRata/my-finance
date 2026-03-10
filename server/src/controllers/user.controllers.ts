@@ -1,6 +1,7 @@
+import type { Request, Response } from "express";
 import { client } from "../config/db.js";
 
-export const userBudget = async (req, res) => {
+export const userBudget = async (req: Request, res: Response) => {
   try {
     const { month, budget } = req.body;
     // budget = [{ category_id: 37, amount: 5000, note: "ค่าอาหาร" }, ...]
@@ -24,9 +25,9 @@ export const userBudget = async (req, res) => {
         RETURNING *
       `;
 
-      // INSERT ทีละรายการด้วย Promise.all (เหมือน cart ใน workshop)
+      // INSERT ทีละรายการด้วย Promise.all
       await Promise.all(
-        budget.map((item) =>
+        budget.map((item: any) =>
           client.query(itemQuery, [
             newBudget.id,
             item.category_id,
@@ -44,7 +45,7 @@ export const userBudget = async (req, res) => {
   }
 };
 
-export const getUserBudget = async (req, res) => {
+export const getUserBudget = async (req: Request, res: Response) => {
   try {
     // ดึงงบ draft ของ user คนนี้ พร้อมรายการข้างใน
     const query = `
@@ -72,7 +73,7 @@ export const getUserBudget = async (req, res) => {
   }
 };
 
-export const emptyBudget = async (req, res) => {
+export const emptyBudget = async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
 
@@ -96,7 +97,7 @@ export const emptyBudget = async (req, res) => {
   }
 };
 
-export const budgetConfirm = async (req, res) => {
+export const budgetConfirm = async (req: Request, res: Response) => {
   try {
     const { id } = req.body;
 
@@ -122,7 +123,7 @@ export const budgetConfirm = async (req, res) => {
   }
 };
 
-export const budgetHistory = async (req, res) => {
+export const budgetHistory = async (req: Request, res: Response) => {
   try {
     // ดึงงบที่ confirmed แล้ว
     const query = `

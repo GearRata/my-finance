@@ -1,6 +1,7 @@
+import type { Request, Response } from "express";
 import { client } from "../config/db.js";
 
-export const list = async (req, res) => {
+export const list = async (req: Request, res: Response) => {
   try {
     const { rows } = await client.query("SELECT * FROM categories");
     res.send(rows);
@@ -10,7 +11,7 @@ export const list = async (req, res) => {
   }
 };
 
-export const create = async (req, res) => {
+export const create = async (req: Request, res: Response) => {
   try {
     const { name, type } = req.body;
     if (!name || !type) {
@@ -28,7 +29,7 @@ export const create = async (req, res) => {
   }
 };
 
-export const update = async (req, res) => {
+export const update = async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
     const { name, type } = req.body;
@@ -53,7 +54,7 @@ export const update = async (req, res) => {
   }
 };
 
-export const remove = async (req, res) => {
+export const remove = async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
     if (!id) {

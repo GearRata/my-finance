@@ -1,6 +1,6 @@
 import express from "express";
-import { authCheck } from "../../middleware/authCheck.js";
-import upload from "../../middleware/multer.js";
+import { authCheck } from "../middleware/authCheck.js";
+import upload from "../middleware/multer.js";
 import {
   list,
   read,
