@@ -12,6 +12,7 @@ import {
 } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import { registerAPI } from "../services/auth.services";
+import { toast } from "sonner";
 
 export function RegisterForm({
   className,
@@ -34,8 +35,8 @@ export function RegisterForm({
     }
 
     try {
-      const result = await registerAPI({ fullname, email, password });
-      console.log("Register Sunccess", result);
+      await registerAPI({ fullname, email, password });
+      toast.success("Created Account Success", { position: "top-center" });
       router.push("/login");
     } catch (error) {
     } finally {
@@ -81,10 +82,6 @@ export function RegisterForm({
             onChange={(e) => setEmail(e.target.value)}
             disabled={isLoading}
           />
-          <FieldDescription>
-            We&apos;ll use this to contact you. We will not share your email
-            with anyone else.
-          </FieldDescription>
         </Field>
         <Field>
           <FieldLabel htmlFor="password">Password</FieldLabel>
@@ -96,9 +93,6 @@ export function RegisterForm({
             onChange={(e) => setPassword(e.target.value)}
             disabled={isLoading}
           />
-          <FieldDescription>
-            Must be at least 8 characters long.
-          </FieldDescription>
         </Field>
         <Field>
           <FieldLabel htmlFor="confirm-password">Confirm Password</FieldLabel>
@@ -110,7 +104,6 @@ export function RegisterForm({
             onChange={(e) => setConfirmPass(e.target.value)}
             disabled={isLoading}
           />
-          <FieldDescription>Please confirm your password.</FieldDescription>
         </Field>
         <Field>
           <Button type="submit">Create Account</Button>

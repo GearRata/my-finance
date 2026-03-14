@@ -1,7 +1,6 @@
 import { RegisterForm } from "@/features/auth/components/register-form";
 import Image from "next/image";
 import logo from "../../../../public/assets/images/Register_logo.jpg";
-import { Maximize } from "lucide-react";
 
 export default function RegisterPage() {
   return (

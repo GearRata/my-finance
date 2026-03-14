@@ -15,6 +15,7 @@ import {
 import { Input } from "@/components/ui/input";
 import Image from "next/image";
 import { loginAPI } from "@/features/auth/services/auth.services";
+import { toast } from "sonner";
 
 export function LoginForm({
   className,
@@ -32,11 +33,16 @@ export function LoginForm({
     setIsLoading(true);
 
     try {
-      const result = await loginAPI({ email, password });
-      console.log("Login Success:", result);
+      await loginAPI({ email, password });
       // เมื่อล็อกอินสำเร็จ ให้ย้ายหน้าไปที่ Dashboard หรือหน้าหลัก
-      router.push("/dashboard");
+      toast.success("Login Success", { position: "top-center" });
+      setTimeout(() => {
+        router.push("/dashboard");
+      }, 1000);
     } catch (err: any) {
+      toast.error("Something went wrong. Please try again.", {
+        position: "top-center",
+      });
       const errorData = err.response?.data;
 
       if (errorData?.errors && errorData.errors.length > 0) {
@@ -44,9 +50,7 @@ export function LoginForm({
         setError(errorData.errors[0].detail);
       } else {
         // ถ้ารหัสผ่านผิด
-        setError(
-          errorData?.message || "Something went wrong. Please try again.",
-        );
+        setError(errorData?.message);
       }
     } finally {
       setIsLoading(false);

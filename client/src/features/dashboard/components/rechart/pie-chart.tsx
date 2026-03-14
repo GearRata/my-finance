@@ -1,0 +1,139 @@
+"use client";
+
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+
+import {
+  Pie,
+  PieChart,
+  ResponsiveContainer,
+  Sector,
+  PieSectorDataItem,
+  Tooltip,
+} from "recharts";
+
+const data = [
+  { name: "อาหาร", value: 4500, fill: "var(--chart-1)" },
+  { name: "เดินทาง", value: 3000, fill: "var(--chart-2)" },
+  { name: "ที่พัก", value: 8500, fill: "var(--chart-3)" },
+  { name: "ช้อปปิ้ง", value: 2000, fill: "var(--chart-4)" },
+  { name: "อื่นๆ", value: 1500, fill: "var(--chart-5)" },
+];
+
+const renderActiveShape = (props: PieSectorDataItem) => {
+  const RADIAN = Math.PI / 180;
+  const {
+    cx,
+    cy,
+    midAngle,
+    innerRadius,
+    outerRadius,
+    startAngle,
+    endAngle,
+    fill,
+    payload,
+    percent,
+    value,
+  } = props;
+
+  const sin = Math.sin(-RADIAN * (midAngle ?? 0));
+  const cos = Math.cos(-RADIAN * (midAngle ?? 0));
+  const sx = (cx as number) + ((outerRadius as number) + 10) * cos;
+  const sy = (cy as number) + ((outerRadius as number) + 10) * sin;
+  const mx = (cx as number) + ((outerRadius as number) + 30) * cos;
+  const my = (cy as number) + ((outerRadius as number) + 30) * sin;
+  const ex = mx + (cos >= 0 ? 1 : -1) * 22;
+  const ey = my;
+  const textAnchor = cos >= 0 ? "start" : "end";
+
+  return (
+    <g>
+      <text
+        x={cx}
+        y={cy}
+        dy={8}
+        textAnchor="middle"
+        fill={fill}
+        className="text-lg font-medium"
+      >
+        {payload.name}
+      </text>
+      <Sector
+        cx={cx}
+        cy={cy}
+        innerRadius={innerRadius}
+        outerRadius={outerRadius}
+        startAngle={startAngle}
+        endAngle={endAngle}
+        fill={fill}
+      />
+      <Sector
+        cx={cx}
+        cy={cy}
+        startAngle={startAngle}
+        endAngle={endAngle}
+        innerRadius={(outerRadius as number) + 6}
+        outerRadius={(outerRadius as number) + 10}
+        fill={fill}
+      />
+      <path
+        d={`M${sx},${sy}L${mx},${my}L${ex},${ey}`}
+        stroke={fill}
+        fill="none"
+      />
+      <circle cx={ex} cy={ey} r={2} fill={fill} stroke="none" />
+      <text
+        x={ex + (cos >= 0 ? 1 : -1) * 12}
+        y={ey}
+        textAnchor={textAnchor}
+        fill="currentColor"
+        className="text-sm"
+      >
+        {`฿${value?.toLocaleString()}`}
+      </text>
+      <text
+        x={ex + (cos >= 0 ? 1 : -1) * 12}
+        y={ey}
+        dy={18}
+        textAnchor={textAnchor}
+        fill="var(--muted-foreground)"
+        className="text-xs"
+      >{`(Rate ${((percent ?? 1) * 100).toFixed(2)}%)`}</text>
+    </g>
+  );
+};
+
+export default function ShapePieChart({ isAnimationActive = true }) {
+  return (
+    <Card className="flex flex-col">
+      <CardHeader className="items-center pb-0">
+        <CardTitle>สัดส่วนรายจ่าย</CardTitle>
+        <CardDescription>แยกตามหมวดหมู่เดือนปัจจุบัน</CardDescription>
+      </CardHeader>
+      <CardContent className="flex-1 pb-0">
+        <div className="h-[400px] w-full min-w-[300px]">
+          <ResponsiveContainer width="100%" height="100%">
+            <PieChart>
+              <Pie
+                activeShape={renderActiveShape}
+                data={data}
+                cx="50%"
+                cy="50%"
+                innerRadius="65%"
+                outerRadius="85%" // ขยายรัศมีให้ใหญ่ขึ้น
+                dataKey="value"
+                isAnimationActive={isAnimationActive}
+              />
+              <Tooltip content={() => null} />
+            </PieChart>
+          </ResponsiveContainer>
+        </div>
+      </CardContent>
+    </Card>
+  );
+}

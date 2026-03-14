@@ -1,9 +1,9 @@
 import apiClient from "@/lib/api/axios";
-import { Login, Register } from "@/types/api/auth.types";
+import { Login, Register } from "@/features/auth/types/auth.types";
 
 // Login
 export const loginAPI = async (data: Login) => {
-  // การเรียกนี้จะแปลงเป็น http://localhost:5000/api/login อัตโนมัติ เพราะเราเซ็ต baseURL ไว้
+
   const response = await apiClient.post("/login", data);
   return response.data;
 };
