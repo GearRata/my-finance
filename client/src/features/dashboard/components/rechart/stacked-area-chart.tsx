@@ -89,7 +89,7 @@ const AreaChartExample = ({ isAnimationActive = true }) => (
               fill="url(#colorExpense)"
               isAnimationActive={isAnimationActive}
             />
-            <RechartsDevtools />
+            {/* <RechartsDevtools /> */}
           </AreaChart>
         </ResponsiveContainer>
       </div>
