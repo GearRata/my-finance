@@ -42,7 +42,11 @@ const AreaChartExample = ({ isAnimationActive = true }) => (
     </CardHeader>
     <CardContent className="flex-1 pb-0">
       <div className="h-[400px] w-full min-w-[300px]">
-        <ResponsiveContainer width="100%" height="100%">
+        <ResponsiveContainer
+          width="100%"
+          height="100%"
+          initialDimension={{ width: 320, height: 200 }}
+        >
           <AreaChart
             data={data}
             margin={{ top: 10, right: 0, left: 0, bottom: 0 }}
