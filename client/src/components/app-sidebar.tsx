@@ -1,7 +1,6 @@
 "use client";
 
 import * as React from "react";
-import { IconLayoutDashboard } from "@tabler/icons-react";
 import {
   Sidebar,
   SidebarContent,
@@ -10,11 +9,12 @@ import {
   SidebarRail,
   useSidebar,
 } from "@/components/ui/sidebar";
-import { NavMain } from "./nav-main";
-import { NavUser } from "./nav-user";
+import { NavMain } from "@/features/dashboard/components/sidebar/nav-main";
+import { NavUser } from "@/features/dashboard/components/sidebar/nav-user";
 import Image from "next/image";
 import { PanelLeft } from "lucide-react";
-import dollar from "../../../../../public/assets/images/dollar.png";
+import dollar from "../../public/assets/images/dollar.png";
+import { MainNavigation } from "@/config/navigation";
 
 const data = {
   user: {
@@ -22,18 +22,13 @@ const data = {
     email: "m@example.com",
     avatar: "",
   },
-  navMain: [
-    { title: "Overview", url: "#", icon: IconLayoutDashboard },
-    { title: "Transactions", url: "#", icon: IconLayoutDashboard },
-    { title: "Goals", url: "#", icon: IconLayoutDashboard },
-    { title: "Monthly Summary", url: "#", icon: IconLayoutDashboard },
-    { title: "Settings", url: "#", icon: IconLayoutDashboard },
-  ],
 };
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const { state, toggleSidebar } = useSidebar();
   const isCollapsed = state === "collapsed";
+
+  console.log(MainNavigation);
 
   return (
     <Sidebar collapsible="icon" {...props}>
@@ -79,7 +74,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
       </SidebarHeader>
 
       <SidebarContent>
-        <NavMain items={data.navMain} />
+        <NavMain items={MainNavigation} />
       </SidebarContent>
       <SidebarFooter>
         <NavUser user={data.user} />

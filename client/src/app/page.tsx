@@ -1,6 +1,6 @@
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
-import Threads from "@/components/Threads";
+import Threads from "@/features/auth/components/Threads";
 
 export default function Home() {
   return (
