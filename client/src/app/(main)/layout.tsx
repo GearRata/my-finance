@@ -10,8 +10,8 @@ export default function Layout({ children }: { children: React.ReactNode }) {
     <SidebarProvider>
       <AppSidebar />
       <SidebarInset>
-        <header className="flex h-12 shrink-0 items-center gap-2 px-4 transition-[width,height] ease-linear">
-          <SidebarTrigger className="mt-3 hidden max-md:block" />
+        <header className="flex h-16 shrink-0 items-center gap-2 border-b px-4">
+          <SidebarTrigger className="-ml-1" />
         </header>
         {children}
       </SidebarInset>
