@@ -108,7 +108,7 @@ const renderActiveShape = (props: PieSectorDataItem) => {
   );
 };
 
-export default function ShapePieChart({ isAnimationActive = true }) {
+export default function ShapePieChart({ pieData = [], isAnimationActive = true }: any) {
   return (
     <Card className="flex flex-col">
       <CardHeader className="items-center pb-0">
@@ -117,25 +117,31 @@ export default function ShapePieChart({ isAnimationActive = true }) {
       </CardHeader>
       <CardContent className="flex-1 pb-0">
         <div className="h-[400px] w-full min-w-[300px]">
-          <ResponsiveContainer
-            width="100%"
-            height="100%"
-            initialDimension={{ width: 320, height: 200 }}
-          >
-            <PieChart>
-              <Pie
-                activeShape={renderActiveShape}
-                data={data}
-                cx="50%"
-                cy="50%"
-                innerRadius="65%"
-                outerRadius="85%" // ขยายรัศมีให้ใหญ่ขึ้น
-                dataKey="value"
-                isAnimationActive={isAnimationActive}
-              />
-              <Tooltip content={() => null} />
-            </PieChart>
-          </ResponsiveContainer>
+          {pieData.length > 0 ? (
+            <ResponsiveContainer
+              width="100%"
+              height="100%"
+              initialDimension={{ width: 320, height: 200 }}
+            >
+              <PieChart>
+                <Pie
+                  activeShape={renderActiveShape}
+                  data={pieData}
+                  cx="50%"
+                  cy="50%"
+                  innerRadius="65%"
+                  outerRadius="85%" // ขยายรัศมีให้ใหญ่ขึ้น
+                  dataKey="value"
+                  isAnimationActive={isAnimationActive}
+                />
+                <Tooltip content={() => null} />
+              </PieChart>
+            </ResponsiveContainer>
+          ) : (
+            <div className="flex h-full items-center justify-center text-muted-foreground">
+              ยังไม่มีข้อมูลค่าใช้จ่ายในเดือนนี้
+            </div>
+          )}
         </div>
       </CardContent>
     </Card>

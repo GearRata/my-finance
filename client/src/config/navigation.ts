@@ -32,7 +32,7 @@ export const MainNavigation: NavItem[] = [
   },
   {
     title: "Monthly Summary",
-    url: "summary",
+    url: "/summary",
     icon: IconChartPie,
   },
   {

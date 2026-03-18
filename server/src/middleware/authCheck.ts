@@ -10,12 +10,6 @@ interface UserRow {
   created_at: Date;
 }
 
-// // ระบุโครงสร้างของ Payload ด้านในให้ TypeScript รู้
-// interface TokenPayload extends jwt.JwtPayload {
-//   id: number;
-//   email: string;
-// }
-
 export const authCheck = async (
   req: Request,
   res: Response,

@@ -28,8 +28,6 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const { state, toggleSidebar } = useSidebar();
   const isCollapsed = state === "collapsed";
 
-  console.log(MainNavigation);
-
   return (
     <Sidebar collapsible="icon" {...props}>
       <SidebarHeader className="h-16 justify-center">
