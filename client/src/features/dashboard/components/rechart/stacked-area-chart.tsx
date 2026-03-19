@@ -5,37 +5,42 @@ import {
   AreaChart,
   CartesianGrid,
   Tooltip,
+  TooltipContentProps,
   XAxis,
   YAxis,
   ResponsiveContainer,
 } from "recharts";
-import { RechartsDevtools } from "@recharts/devtools";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
-const data = [
-  { month: "มกราคม", income: 10000, expense: 5000 },
-  { month: "กุมภาพันธ์", income: 25000, expense: 6000 }, // รวม income จาก 5000 + 100
-  { month: "มีนาคม", income: 15000, expense: 9000 },
-];
-
-const chartColorConfig = {
-  income: {
-    label: "รายรับ",
-    color: "var(--chart-1)",
-  },
-  expense: {
-    label: "รายจ่าย",
-    color: "var(--chart-5)",
-  },
+const CustomTooltip = ({ active, payload, label }: TooltipContentProps) => {
+  const isVisible = active && payload && payload.length;
+  return (
+    <div
+      className="custom-tooltip"
+      style={{
+        backgroundColor: "white",
+        color: "#000",
+        border: "1px solid #ccc",
+        padding: "10px",
+        borderRadius: "10px",
+        boxShadow: "0 0 10px rgba(0,0,0,0.2)",
+      }}
+    >
+      {isVisible && (
+        <>
+          <p className="label" style={{ fontWeight: "bold" }}>{`${label} `}</p>
+          <p className="desc">{`${payload[0].name} : ${payload[0].value}`}</p>
+          <p className="desc">{`${payload[1].name} : ${payload[1].value}`}</p>
+        </>
+      )}
+    </div>
+  );
 };
 
-const AreaChartExample = ({ trendData = [], isAnimationActive = true }: any) => (
+const AreaChartExample = ({
+  trendData = [],
+  isAnimationActive = true,
+}: any) => (
   <Card>
     <CardHeader>
       <CardTitle>แนวโน้มรายรับรายจ่าย</CardTitle>
@@ -59,7 +64,11 @@ const AreaChartExample = ({ trendData = [], isAnimationActive = true }: any) => 
                     stopColor="var(--chart-1)"
                     stopOpacity={0.8}
                   />
-                  <stop offset="95%" stopColor="var(--chart-1)" stopOpacity={0} />
+                  <stop
+                    offset="95%"
+                    stopColor="var(--chart-1)"
+                    stopOpacity={0}
+                  />
                 </linearGradient>
                 <linearGradient id="colorExpense" x1="0" y1="0" x2="0" y2="1">
                   <stop
@@ -67,13 +76,17 @@ const AreaChartExample = ({ trendData = [], isAnimationActive = true }: any) => 
                     stopColor="var(--chart-5)"
                     stopOpacity={0.8}
                   />
-                  <stop offset="95%" stopColor="var(--chart-5)" stopOpacity={0} />
+                  <stop
+                    offset="95%"
+                    stopColor="var(--chart-5)"
+                    stopOpacity={0}
+                  />
                 </linearGradient>
               </defs>
               <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
               <XAxis dataKey="month" />
               <YAxis width="auto" />
-              <Tooltip />
+              <Tooltip content={CustomTooltip} />
               <Area
                 type="monotone"
                 dataKey="income"

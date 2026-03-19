@@ -20,11 +20,12 @@ const formatCurrency = (value: number) => {
   }).format(value);
 };
 
-export function SectionCards({ data = {} }: any) {
-  const totalIncome = data.totalIncome || 0;
-  const totalExpense = data.totalExpense || 0;
+export function SectionCards({ data }: any) {
+  const totalIncome = data.total_income || 0;
+  const totalExpense = data.total_expense || 0;
   const balance = data.balance || 0;
-  const savingsRate = totalIncome > 0 ? ((balance / totalIncome) * 100).toFixed(1) : "0.0";
+  const savingsRate =
+    totalIncome > 0 ? ((balance / totalIncome) * 100).toFixed(1) : "0.0";
 
   return (
     <div className="grid grid-cols-2 gap-4 lg:grid-cols-4 ">

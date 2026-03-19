@@ -17,26 +17,25 @@ import SectionGoal from "@/features/dashboard/components/table/section-goal";
 export default function page() {
   const [transaction, setTransaction] = useState<Transactions>([]);
   const [goal, setGoal] = useState<any>([]);
-  const [card, setCard] = useState<any>([]);
+  const [total, setTotal] = useState<any>([]);
   const [analytics, setAnalytics] = useState<any>({ trend: [], pie: [] });
 
   useEffect(() => {
     const fetchData = async () => {
       try {
-      
-        const [summaryResponse, analyticsResponse, transactions, goals] = await Promise.all([
+        const [total, analytics, transactions, goals] = await Promise.all([
           fetchDashboardSummary(),
           fetchDashboardAnalytics(),
           fetchTransactions(5),
-          fetchGoals(5) 
+          fetchGoals(5),
         ]);
-        
+
         setTransaction(
           Array.isArray(transactions) ? transactions.slice(0, 5) : [],
         );
         setGoal(Array.isArray(goals) ? goals.slice(0, 3) : []);
-        setCard(summaryResponse);
-        setAnalytics(analyticsResponse);
+        setTotal(total.data);
+        setAnalytics(analytics.data);
       } catch (error) {
         console.error("❌ ดึงข้อมูลพลาด:", error);
       }
@@ -48,7 +47,7 @@ export default function page() {
       <div className="text-6xl pb-4">
         <h1>Overview</h1>
       </div>
-      <SectionCards data={card} />
+      <SectionCards data={total} />
       <div className="grid gap-4 lg:grid-cols-2">
         <StackedAreaChart trendData={analytics.trend} />
         <ShapePieChart pieData={analytics.pie} />

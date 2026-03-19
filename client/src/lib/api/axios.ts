@@ -22,7 +22,7 @@ const apiClient: AxiosInstance = axios.create({
 // ทำงานคล้ายๆกับ middleware
 // Request Interceptor
 apiClient.interceptors.request.use((config: InternalAxiosRequestConfig) => {
-  const token = Cookies.get("token"); // ✅ แก้ตรงนี้
+  const token = Cookies.get("token");
   if (token) config.headers.Authorization = `Bearer ${token}`;
   console.log(`📤 ${config.method?.toUpperCase()} ${config.url}`);
   return config;

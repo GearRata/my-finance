@@ -338,40 +338,47 @@ export const searchFilter = async (req: Request, res: Response) => {
 export const total = async (req: Request, res: Response) => {
   try {
     const user_id = req.user.id;
-
-    // COALESCE คือ ไม่เอาค่า NULL ถ้า argument แรกเป็น NULL ก็จะไปเอาค่าถัดไป
     const query = `
       SELECT
+        a.id as account_id,
+        a.name as account_name,
+        a.balance,
         COALESCE(
           SUM(
             CASE
               WHEN c.type = 'income' THEN t.amount ELSE 0
             END
           ), 0
-        ) AS total_income,
+        ) as total_income,
         COALESCE(
           SUM(
             CASE
-              WHEN c.type = 'expense' THEN t.amount ELSE 0 
+              WHEN c.type = 'expense' THEN t.amount ELSE 0
             END
           ), 0 
-        ) AS total_expense
-      FROM transactions t
+        ) as total_expense
+      FROM accounts a
+      LEFT JOIN transactions t ON t.account_id = a.id
       LEFT JOIN categories c ON t.category_id = c.id
-      WHERE t.user_id = $1
+      WHERE a.user_id = $1
+      GROUP BY a.id, a.name, a.balance
+      ORDER BY a.id ASC
     `;
 
     const { rows } = await client.query(query, [user_id]);
     const data = rows[0];
-
-    const totalIncome = Number(data.total_income);
-    const totalExpense = Number(data.total_expense);
-    const balance = totalIncome - totalExpense;
-
-    res.json({ totalIncome, totalExpense, balance });
+    res.status(200).json({
+      status: "success",
+      message: "Retrieved totals successfully",
+      data,
+    });
   } catch (error) {
     console.log(error);
-    res.status(500).json({ message: "Internal server error" });
+    res.status(500).json({
+      status: "error",
+      message: "Internal server error occurred while fetching data",
+      data: null,
+    });
   }
 };
 
@@ -380,12 +387,12 @@ export const analytics = async (req: Request, res: Response) => {
     const user_id = req.user.id;
 
     const trendQuery = `
-      SELECT 
+      SELECT
         to_char(t.transaction_date, 'YYYY-MM') as month,
         COALESCE(
           SUM(
-            CASE 
-              WHEN c.type = 'income' THEN t.amount ELSE 0 
+            CASE
+              WHEN c.type = 'income' THEN t.amount ELSE 0
             END
           ), 0
         ) as income,
@@ -393,14 +400,15 @@ export const analytics = async (req: Request, res: Response) => {
           SUM(
             CASE
               WHEN c.type = 'expense' THEN t.amount ELSE 0
-            END
+              END
           ), 0
         ) as expense
-      FROM transactions t
+      FROM accounts a
+      LEFT JOIN transactions t ON t.account_id = a.id
       LEFT JOIN categories c ON t.category_id = c.id
-      WHERE user_id = $1 AND transaction_date >= date_trunc('month', CURRENT_DATE - INTERVAL '1 year')
-      GROUP BY month
-      ORDER BY month asc
+      WHERE a.user_id = $1 AND transaction_date >= date_trunc('month', CURRENT_DATE - INTERVAL '1 year')
+      GROUP BY to_char(t.transaction_date, 'YYYY-MM')
+      ORDER BY month ASC
     `;
     const trendResult = await client.query(trendQuery, [user_id]);
 

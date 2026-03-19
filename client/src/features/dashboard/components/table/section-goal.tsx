@@ -18,7 +18,6 @@ const formatCurrency = (value: number) => {
 };
 
 export default function SectionGoal({ data }: any) {
-  console.log(data);
   return (
     <Card>
       <CardHeader>
