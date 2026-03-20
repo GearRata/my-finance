@@ -28,6 +28,12 @@ const data = {
 };
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
+<<<<<<< HEAD
+=======
+  const { state, toggleSidebar } = useSidebar();
+  const isCollapsed = state === "collapsed";
+
+>>>>>>> feat/dashboard
   return (
     <Sidebar collapsible="icon" {...props}>
       <SidebarHeader className="flex">

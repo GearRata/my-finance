@@ -15,59 +15,18 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import type { Transactions } from "@/features/dashboard/types/dashboard.types";
 
-const invoices = [
-  {
-    invoice: "INV001",
-    paymentStatus: "Paid",
-    totalAmount: "$250.00",
-    paymentMethod: "Credit Card",
-  },
-  {
-    invoice: "INV002",
-    paymentStatus: "Pending",
-    totalAmount: "$150.00",
-    paymentMethod: "PayPal",
-  },
-  {
-    invoice: "INV003",
-    paymentStatus: "Unpaid",
-    totalAmount: "$350.00",
-    paymentMethod: "Bank Transfer",
-  },
-  {
-    invoice: "INV004",
-    paymentStatus: "Paid",
-    totalAmount: "$450.00",
-    paymentMethod: "Credit Card",
-  },
-  {
-    invoice: "INV005",
-    paymentStatus: "Paid",
-    totalAmount: "$550.00",
-    paymentMethod: "PayPal",
-  },
-  {
-    invoice: "INV006",
-    paymentStatus: "Pending",
-    totalAmount: "$200.00",
-    paymentMethod: "Bank Transfer",
-  },
-  {
-    invoice: "INV007",
-    paymentStatus: "Unpaid",
-    totalAmount: "$300.00",
-    paymentMethod: "Credit Card",
-  },
-];
-
-export function TableTranscation() {
+interface TransactionProps {
+  data: Transactions;
+}
+export function TableTranscation({ data }: TransactionProps) {
   return (
     <Card>
       <CardHeader className="items-center pb-0">
         <CardTitle className="text-2xl">Recent List</CardTitle>
         <CardDescription className="text-xl">
-          5 Recent Transactions{" "}
+          5 Recent Transactions
         </CardDescription>
       </CardHeader>
       <CardContent>
@@ -80,13 +39,13 @@ export function TableTranscation() {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {invoices.map((invoice) => (
-                <TableRow key={invoice.invoice}>
+              {data.map((items) => (
+                <TableRow key={items.id}>
                   <TableCell className="font-medium text-lg">
-                    {invoice.invoice}
+                    {items.note}
                   </TableCell>
                   <TableCell className="text-right text-lg">
-                    {invoice.totalAmount}
+                    {items.amount}
                   </TableCell>
                 </TableRow>
               ))}

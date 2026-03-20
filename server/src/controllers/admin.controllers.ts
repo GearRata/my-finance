@@ -1,5 +1,6 @@
 import type { Request, Response } from "express";
 import { client } from "../config/db.js";
+import { sendSuccess, sendFail, sendError } from "../utils/apiResponse.js";
 
 export const listUsers = async (req: Request, res: Response) => {
   try {
@@ -11,10 +12,10 @@ export const listUsers = async (req: Request, res: Response) => {
     `;
     const { rows } = await client.query(query);
 
-    res.json({ message: "ok", data: rows });
+    return sendSuccess(res, rows, "List Users");
   } catch (error) {
     console.log(error);
-    res.status(500).json({ message: "Server Error" });
+    return sendError(res);
   }
 };
 
@@ -34,7 +35,7 @@ export const changeStatus = async (req: Request, res: Response) => {
     }
 
     if (errors.length > 0) {
-      return res.status(400).json({ message: "Invalid request", errors });
+      return sendFail(res, "Invalid request", "VALIDATION_ERROR", errors, 400);
     }
 
     const query = `
@@ -46,10 +47,10 @@ export const changeStatus = async (req: Request, res: Response) => {
         id = $2
     `;
     await client.query(query, [enabled, id]);
-    res.json({ message: "Update Status Success" });
+    return sendSuccess(res, null, "Update Status Success");
   } catch (error) {
     console.log(error);
-    res.status(500).json({ message: "Server Error" });
+    return sendError(res);
   }
 };
 
@@ -67,7 +68,7 @@ export const changeRole = async (req: Request, res: Response) => {
     }
 
     if (errors.length > 0) {
-      return res.status(400).json({ message: "Invalid request", errors });
+      return sendFail(res, "Invalid request", "VALIDATION_ERROR", errors, 400);
     }
     const query = `
       UPDATE
@@ -80,9 +81,9 @@ export const changeRole = async (req: Request, res: Response) => {
 
     await client.query(query, [role, id]);
 
-    res.send("Update Role Success");
+    return sendSuccess(res, null, "Update Role Success");
   } catch (error) {
     console.log(error);
-    res.status(500).json({ message: "Server Error" });
+    return sendError(res);
   }
 };

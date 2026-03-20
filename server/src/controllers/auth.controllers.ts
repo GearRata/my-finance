@@ -2,6 +2,7 @@ import type { Request, Response } from "express";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import { client } from "../config/db.js";
+import { sendSuccess, sendError, sendFail } from "../utils/apiResponse.js";
 
 export const register = async (req: Request, res: Response) => {
   try {
@@ -27,7 +28,7 @@ export const register = async (req: Request, res: Response) => {
     }
 
     if (errors.length > 0) {
-      return res.status(400).json({ message: "Invalid", errors });
+      return sendFail(res, "Invalid Request data", "VALIDATION_ERROR", errors, 400);
     }
 
     // Check if email already exists (ตรวจสอบว่าอีเมลนี้มีอยู่แล้วหรือไม่)
@@ -43,7 +44,7 @@ export const register = async (req: Request, res: Response) => {
     const user = rows[0];
 
     if (user) {
-      return res.status(400).json({ message: "Email already exists" });
+      return sendFail(res, "Email already exists", "EMAIL_EXISTS", null, 400);
     }
 
     // Hash password (นำรหัสมาเข้ารหัสแบบทางเดียวและ salt เพิ่มเข้าไป)
@@ -66,11 +67,10 @@ export const register = async (req: Request, res: Response) => {
 			`,
       [email, hashPassword],
     );
-
-    res.send("Register Success");
+    return sendSuccess(res, null, "Register Success", 201);
   } catch (error) {
     console.log(error);
-    res.status(500).json({ message: "Internal server error" });
+    return sendError(res);
   }
 };
 
@@ -93,7 +93,7 @@ export const login = async (req: Request, res: Response) => {
     }
 
     if (errors.length > 0) {
-      return res.status(400).json({ message: "Invalid", errors });
+      return sendFail(res, "Invalid Request data", "VALIDATION_ERROR", errors, 400);
     }
 
     // Check if user exists
@@ -105,18 +105,18 @@ export const login = async (req: Request, res: Response) => {
 
     // เช็ค user ว่าเจอไหม
     if (!user) {
-      return res.status(404).json({ message: "User not found" });
+      return sendFail(res, "User not found", "USER_NOT_FOUND", null, 404);
     }
 
     // เช็ค user ว่าได้ status เป็น enabled ยัง
     if (!user.enabled) {
-      return res.status(400).json({ message: "User not enabled" });
+      return sendFail(res, "User not enabled", "USER_DISABLED", null, 400);
     }
 
     // Check if password is correct
     const isMatch = await bcrypt.compare(password, user.password);
     if (!isMatch) {
-      return res.status(400).json({ message: "Password is not correct" });
+      return sendFail(res, "Password is not correct", "INVALID_PASSWORD", null, 400);
     }
 
     // Create Payload
@@ -132,7 +132,7 @@ export const login = async (req: Request, res: Response) => {
       { expiresIn: "5h" },
       (err, token) => {
         if (err || !token) {
-          return res.status(500).json({ message: "Internal server error" });
+          return sendError(res);
         }
 
         // Response ให้เก็บ cookie ไว้บน Browser
@@ -142,13 +142,12 @@ export const login = async (req: Request, res: Response) => {
           maxAge: 5 * 60 * 60 * 1000, // 5 hours in milliseconds
           sameSite: "none",
         });
-
-        res.json({ message: "Login Success", payload });
+        return sendSuccess(res, payload, "Login Sucess");
+        // res.json({ message: "Login Success", payload });
       },
     );
   } catch (error) {
-    console.log(error);
-    res.status(500).json({ message: "Internal server error" });
+    return sendError(res);
   }
 };
 
@@ -159,19 +158,17 @@ export const logout = async (req: Request, res: Response) => {
       secure: true,
       sameSite: "none",
     });
-    res.json({ message: "Logout Success" });
+    return sendSuccess(res, null, "Logout Success");
   } catch (error) {
-    console.log(error);
-    res.status(500).json({ message: "Internal server error" });
+    return sendError(res);
   }
 };
 
 export const currentUser = async (req: Request, res: Response) => {
   try {
     // authCheck ดึงข้อมูลมาใส่ req.user ไว้แล้ว
-    res.json({ message: "ok", data: req.user });
+    return sendSuccess(res, req.user, "Current User");
   } catch (error) {
-    console.log(error);
-    res.status(500).json({ message: "Internal server error" });
+    return sendError(res);
   }
 };
