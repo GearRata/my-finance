@@ -503,7 +503,17 @@ export const total = async (req: Request, res: Response) => {
     `;
 
     const { rows } = await client.query(query, [user_id]);
-    const data = rows[0];
+
+    const changType = rows.map((row) => ({
+      account_id: row.account_id,
+      account_name: row.account_name,
+      balance: Number(row.balance),
+      total_income: Number(row.total_income),
+      total_expense: Number(row.total_expense),
+    }));
+
+    const data = changType[0];
+
     return sendSuccess(res, data, "Retrieved totals successfully");
   } catch (error) {
     console.log(error);

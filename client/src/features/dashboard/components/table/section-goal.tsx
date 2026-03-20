@@ -7,6 +7,7 @@ import {
 } from "@/components/ui/card";
 import { Field, FieldLabel } from "@/components/ui/field";
 import { Progress } from "@/components/ui/progress";
+import type { Goals } from "../../types/dashboard.types";
 
 // รูปแบบสกุลเงิน
 const formatCurrency = (value: number) => {
@@ -17,7 +18,11 @@ const formatCurrency = (value: number) => {
   }).format(value);
 };
 
-export default function SectionGoal({ data }: any) {
+interface GoalProps {
+  data: Goals;
+}
+
+export default function SectionGoal({ data }: GoalProps) {
   return (
     <Card>
       <CardHeader>
@@ -26,7 +31,7 @@ export default function SectionGoal({ data }: any) {
       </CardHeader>
       <CardContent>
         <div className="space-y-6">
-          {data.map((items: any) => {
+          {data.map((items) => {
             const progress = (items.current_amount / items.target_amount) * 100;
             return (
               <Field key={items.id} className="w-full space-y-2">

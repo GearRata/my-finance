@@ -17,13 +17,12 @@ import {
   Tooltip,
 } from "recharts";
 
-const data = [
-  { name: "อาหาร", value: 4500, fill: "var(--chart-1)" },
-  { name: "เดินทาง", value: 3000, fill: "var(--chart-2)" },
-  { name: "ที่พัก", value: 8500, fill: "var(--chart-3)" },
-  { name: "ช้อปปิ้ง", value: 2000, fill: "var(--chart-4)" },
-  { name: "อื่นๆ", value: 1500, fill: "var(--chart-5)" },
-];
+import type { PieType } from "../../types/dashboard.types";
+
+interface PieTypeProps {
+  pieData: PieType[];
+  isAnimationActive?: boolean;
+}
 
 const renderActiveShape = (props: PieSectorDataItem) => {
   const RADIAN = Math.PI / 180;
@@ -108,7 +107,10 @@ const renderActiveShape = (props: PieSectorDataItem) => {
   );
 };
 
-export default function ShapePieChart({ pieData = [], isAnimationActive = true }: any) {
+export default function ShapePieChart({
+  pieData,
+  isAnimationActive = true,
+}: PieTypeProps) {
   return (
     <Card className="flex flex-col">
       <CardHeader className="items-center pb-0">

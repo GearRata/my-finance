@@ -7,7 +7,12 @@ import {
   fetchDashboardSummary,
   fetchDashboardAnalytics,
 } from "@/features/dashboard/services/dashboard.services";
-import type { Transactions } from "@/features/dashboard/types/dashboard.types";
+import type {
+  Transactions,
+  Goals,
+  Total,
+  Analytics,
+} from "@/features/dashboard/types/dashboard.types";
 import { SectionCards } from "@/features/dashboard/components/cards/section-cards";
 import StackedAreaChart from "@/features/dashboard/components/rechart/stacked-area-chart";
 import ShapePieChart from "@/features/dashboard/components/rechart/pie-chart";
@@ -16,9 +21,13 @@ import SectionGoal from "@/features/dashboard/components/table/section-goal";
 
 export default function page() {
   const [transaction, setTransaction] = useState<Transactions>([]);
-  const [goal, setGoal] = useState<any>([]);
-  const [total, setTotal] = useState<any>([]);
-  const [analytics, setAnalytics] = useState<any>({ trend: [], pie: [] });
+  const [goal, setGoal] = useState<Goals>([]);
+  const [total, setTotal] = useState<Total>({
+    total_income: 0,
+    total_expense: 0,
+    balance: 0,
+  });
+  const [analytics, setAnalytics] = useState<Analytics>({ trend: [], pie: [] });
 
   useEffect(() => {
     const fetchData = async () => {
@@ -27,13 +36,10 @@ export default function page() {
           fetchDashboardSummary(),
           fetchDashboardAnalytics(),
           fetchTransactions(5),
-          fetchGoals(5),
+          fetchGoals(4),
         ]);
-
-        setTransaction(
-          Array.isArray(transactions) ? transactions.slice(0, 5) : [],
-        );
-        setGoal(Array.isArray(goals) ? goals.slice(0, 3) : []);
+        setTransaction(transactions.data);
+        setGoal(goals.data);
         setTotal(total.data);
         setAnalytics(analytics.data);
       } catch (error) {
@@ -42,6 +48,7 @@ export default function page() {
     };
     fetchData();
   }, []);
+
   return (
     <div className="flex flex-1 flex-col gap-4 p-4 ">
       <div className="text-6xl pb-4">

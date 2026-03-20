@@ -15,10 +15,10 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import type { Transaction } from "@/features/dashboard/types/dashboard.types";
+import type { Transactions } from "@/features/dashboard/types/dashboard.types";
 
 interface TransactionProps {
-  data: Transaction[];
+  data: Transactions;
 }
 export function TableTranscation({ data }: TransactionProps) {
   return (
@@ -26,7 +26,7 @@ export function TableTranscation({ data }: TransactionProps) {
       <CardHeader className="items-center pb-0">
         <CardTitle className="text-2xl">Recent List</CardTitle>
         <CardDescription className="text-xl">
-          5 Recent Transactions{" "}
+          5 Recent Transactions
         </CardDescription>
       </CardHeader>
       <CardContent>

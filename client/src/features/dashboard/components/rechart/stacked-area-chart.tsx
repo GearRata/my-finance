@@ -11,6 +11,12 @@ import {
   ResponsiveContainer,
 } from "recharts";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import type { TrendType } from "../../types/dashboard.types";
+
+interface TrendProps {
+  trendData: TrendType[];
+  isAnimationActive?: boolean;
+}
 
 const CustomTooltip = ({ active, payload, label }: TooltipContentProps) => {
   const isVisible = active && payload && payload.length;
@@ -38,9 +44,9 @@ const CustomTooltip = ({ active, payload, label }: TooltipContentProps) => {
 };
 
 const AreaChartExample = ({
-  trendData = [],
+  trendData,
   isAnimationActive = true,
-}: any) => (
+}: TrendProps) => (
   <Card>
     <CardHeader>
       <CardTitle>แนวโน้มรายรับรายจ่าย</CardTitle>

@@ -20,8 +20,14 @@ const formatCurrency = (value: number) => {
   }).format(value);
 };
 
-export function SectionCards({ data }: any) {
-  const totalIncome = data.total_income || 0;
+import type { Total } from "../../types/dashboard.types";
+
+interface TotalProps {
+  data: Total;
+}
+
+export function SectionCards({ data }: TotalProps) {
+  const totalIncome = data.total_income;
   const totalExpense = data.total_expense || 0;
   const balance = data.balance || 0;
   const savingsRate =
