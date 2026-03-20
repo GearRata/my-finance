@@ -1,12 +1,11 @@
 import type { Request, Response } from "express";
 import { client } from "../config/db.js";
+import { sendSuccess, sendFail, sendError } from "../utils/apiResponse.js";
 
 export const userBudget = async (req: Request, res: Response) => {
   try {
     const { month, budget } = req.body;
-    // budget = [{ category_id: 37, amount: 5000, note: "ค่าอาหาร" }, ...]
 
-    // 1. สร้างงบ (budgets)
     const budgetQuery = `
       INSERT INTO
         budgets (month, user_id, created_at)
@@ -16,7 +15,6 @@ export const userBudget = async (req: Request, res: Response) => {
     const { rows } = await client.query(budgetQuery, [month, req.user.id]);
     const newBudget = rows[0];
 
-    // 2. เพิ่มรายการ (budget_items) — ถ้ามี
     if (budget && budget.length > 0) {
       const itemQuery = `
         INSERT INTO
@@ -24,8 +22,6 @@ export const userBudget = async (req: Request, res: Response) => {
         VALUES ($1, $2, $3, $4, NOW())
         RETURNING *
       `;
-
-      // INSERT ทีละรายการด้วย Promise.all
       await Promise.all(
         budget.map((item: any) =>
           client.query(itemQuery, [
@@ -38,16 +34,15 @@ export const userBudget = async (req: Request, res: Response) => {
       );
     }
 
-    res.json({ message: "Add Budget Success", data: newBudget });
+    return sendSuccess(res, newBudget, "Add Budget Success");
   } catch (error) {
     console.log(error);
-    res.status(500).json({ message: "Cannot add budget" });
+    return sendError(res, "Cannot add budget");
   }
 };
 
 export const getUserBudget = async (req: Request, res: Response) => {
   try {
-    // ดึงงบ draft ของ user คนนี้ พร้อมรายการข้างใน
     const query = `
       SELECT
         b.id AS budget_id,
@@ -66,10 +61,10 @@ export const getUserBudget = async (req: Request, res: Response) => {
     `;
     const { rows } = await client.query(query, [req.user.id]);
 
-    res.json({ message: "ok", data: rows });
+    return sendSuccess(res, rows);
   } catch (error) {
     console.log(error);
-    res.status(500).json({ message: "Server Error" });
+    return sendError(res);
   }
 };
 
@@ -87,13 +82,13 @@ export const emptyBudget = async (req: Request, res: Response) => {
     const { rows } = await client.query(query, [id, req.user.id]);
 
     if (rows.length === 0) {
-      return res.status(404).json({ message: "Budget not found" });
+      return sendFail(res, "Budget not found", "NOT_FOUND", null, 404);
     }
 
-    res.json({ message: "Deleted", data: rows });
+    return sendSuccess(res, rows, "Deleted");
   } catch (error) {
     console.log(error);
-    res.status(500).json({ message: "Server Error" });
+    return sendError(res);
   }
 };
 
@@ -101,7 +96,6 @@ export const budgetConfirm = async (req: Request, res: Response) => {
   try {
     const { id } = req.body;
 
-    // เปลี่ยน status จาก draft → confirmed (ล็อคงบ)
     const query = `
       UPDATE budgets
       SET status = 'confirmed', updated_at = NOW()
@@ -111,15 +105,19 @@ export const budgetConfirm = async (req: Request, res: Response) => {
     const { rows } = await client.query(query, [id, req.user.id]);
 
     if (rows.length === 0) {
-      return res
-        .status(404)
-        .json({ message: "Budget not found or already confirmed" });
+      return sendFail(
+        res,
+        "Budget not found or already confirmed",
+        "NOT_FOUND",
+        null,
+        404,
+      );
     }
 
-    res.json({ message: "Budget confirmed", data: rows[0] });
+    return sendSuccess(res, rows[0], "Budget confirmed");
   } catch (error) {
     console.log(error);
-    res.status(500).json({ message: "Server Error" });
+    return sendError(res);
   }
 };
 
@@ -145,9 +143,9 @@ export const budgetHistory = async (req: Request, res: Response) => {
     const { rows } = await client.query(query, [req.user.id]);
     console.log(req.user.id);
 
-    res.json({ message: "ok", data: rows });
+    return sendSuccess(res, rows);
   } catch (error) {
     console.log(error);
-    res.status(500).json({ message: "Server Error" });
+    return sendError(res);
   }
 };

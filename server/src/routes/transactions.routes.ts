@@ -19,7 +19,7 @@ router.get("/transactions/:count", authCheck, list);
 router.post("/transactions", authCheck, create);
 router.post("/transactions/search", authCheck, searchFilter);
 router.post("/transactionBy", authCheck, listby);
-router.put("/transactions", authCheck, update);
-router.delete("/transactions", authCheck, remove);
+router.put("/transactions/:id", authCheck, update);
+router.delete("/transactions/:id", authCheck, remove);
 
 export default router;

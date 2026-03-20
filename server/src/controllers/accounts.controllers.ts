@@ -1,13 +1,14 @@
 import type { Request, Response } from "express";
 import { client } from "../config/db.js";
+import { sendSuccess, sendFail, sendError } from "../utils/apiResponse.js";
 
 export const list = async (req: Request, res: Response) => {
   try {
     const { rows } = await client.query("SELECT * FROM accounts");
-    res.send(rows);
+    return sendSuccess(res, rows, "List Accounts");
   } catch (error) {
     console.log(error);
-    res.status(500).json({ message: "Internal server error" });
+    return sendError(res);
   }
 };
 
@@ -18,7 +19,13 @@ export const create = async (req: Request, res: Response) => {
 
     // Validate request
     if (!name || !balance) {
-      return res.status(400).json({ message: "name and balance are required" });
+      return sendFail(
+        res,
+        "name and balance are required",
+        "VALIDATION_ERROR",
+        null,
+        400,
+      );
     }
 
     // Create new Account
@@ -27,10 +34,10 @@ export const create = async (req: Request, res: Response) => {
       [name, balance, user_id],
     );
 
-    res.status(201).json({ message: "Created" });
+    return sendSuccess(res, null, "Created account", 201);
   } catch (error) {
     console.log(error);
-    res.status(500).json({ message: "Internal server error" });
+    return sendError(res);
   }
 };
 
@@ -40,10 +47,16 @@ export const update = async (req: Request, res: Response) => {
     const { name, balance, user_id } = req.body;
 
     if (!id) {
-      return res.status(400).json({ message: "Id is required" });
+      return sendFail(res, "Id is required", "VALIDATION_ERROR", null, 400);
     }
     if (!name || !balance) {
-      return res.status(400).json({ message: "Name and balance are required" });
+      return sendFail(
+        res,
+        "Name and balance are required",
+        "VALIDATION_ERROR",
+        null,
+        400,
+      );
     }
 
     // Update account data
@@ -53,12 +66,12 @@ export const update = async (req: Request, res: Response) => {
     );
     const updateAccount = rows[0];
     if (!updateAccount) {
-      return res.status(404).json({ message: "Account not found" });
+      return sendFail(res, "Account not found", "NOT_FOUND", null, 404);
     }
-    res.send(updateAccount);
+    return sendSuccess(res, updateAccount, "Account updated");
   } catch (error) {
     console.log(error);
-    res.status(500).json({ message: "Internal server error" });
+    return sendError(res);
   }
 };
 
@@ -66,7 +79,7 @@ export const remove = async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
     if (!id) {
-      return res.status(400).json({ message: "Id is required" });
+      return sendFail(res, "Id is required", "VALIDATION_ERROR", null, 400);
     }
 
     // Delete account
@@ -77,11 +90,11 @@ export const remove = async (req: Request, res: Response) => {
     const account = rows[0];
 
     if (!account) {
-      return res.status(404).json({ message: "Account not found" });
+      return sendFail(res, "Account not found", "NOT_FOUND", null, 404);
     }
-    res.send("Delete Account");
+    return sendSuccess(res, null, "Delete Account");
   } catch (error) {
     console.log(error);
-    res.status(500).json({ message: "Internal server error" });
+    return sendError(res);
   }
 };

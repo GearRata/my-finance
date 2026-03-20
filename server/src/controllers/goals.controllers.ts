@@ -1,5 +1,6 @@
 import type { Request, Response } from "express";
 import { client } from "../config/db.js";
+import { sendSuccess, sendFail, sendError } from "../utils/apiResponse.js";
 
 export const list = async (req: Request, res: Response) => {
   try {
@@ -28,10 +29,10 @@ export const list = async (req: Request, res: Response) => {
             LIMIT $1
         `;
     const { rows } = await client.query(query, [count]);
-    res.send(rows);
+    return sendSuccess(res, rows, "List Goals");
   } catch (error) {
     console.log(error);
-    res.status(500).json({ message: "Internal server error" });
+    return sendError(res);
   }
 };
 
@@ -40,7 +41,7 @@ export const read = async (req: Request, res: Response) => {
     const { id } = req.params;
 
     if (!id) {
-      return res.status(400).json({ message: "Id is required" });
+      return sendFail(res, "Id is required", "VALIDATION_ERROR", null, 400);
     }
 
     const query = `
@@ -66,10 +67,10 @@ export const read = async (req: Request, res: Response) => {
                 goals.id = $1
         `;
     const { rows } = await client.query(query, [id]);
-    res.send(rows);
+    return sendSuccess(res, rows, `Goal ID ${id}`);
   } catch (error) {
     console.log(error);
-    res.status(500).json({ message: "Internal server error" });
+    return sendError(res);
   }
 };
 
@@ -80,9 +81,7 @@ export const create = async (req: Request, res: Response) => {
       req.body;
 
     if (!name || !target_amount || !user_id) {
-      return res
-        .status(400)
-        .json({ message: "Name and target amount are required" });
+      return sendFail(res, "Name and target amount are required", "VALIDATION_ERROR", null, 400);
     }
 
     const currentAmount = current_amount || 0;
@@ -140,10 +139,10 @@ export const create = async (req: Request, res: Response) => {
       await Promise.all(imagePromises);
     }
 
-    res.status(201).json(newGoal);
+    return sendSuccess(res, newGoal, "Goal created", 201);
   } catch (error) {
     console.log(error);
-    res.status(500).json({ message: "Internal server error" });
+    return sendError(res);
   }
 };
 
@@ -160,11 +159,11 @@ export const update = async (req: Request, res: Response) => {
     } = req.body;
 
     if (!id) {
-      return res.status(400).json({ message: "Id is required" });
+      return sendFail(res, "Id is required", "VALIDATION_ERROR", null, 400);
     }
 
     if (!name || !target_amount || !user_id || !current_amount) {
-      return res.status(400).json({ message: "All field are required" });
+      return sendFail(res, "All fields are required", "VALIDATION_ERROR", null, 400);
     }
 
     // clear images
@@ -234,10 +233,10 @@ export const update = async (req: Request, res: Response) => {
       await Promise.all(imagesPromises);
     }
 
-    res.status(200).json(updateGoal);
+    return sendSuccess(res, updateGoal, "Goal updated");
   } catch (error) {
     console.log(error);
-    res.status(500).json({ message: "Internal server error" });
+    return sendError(res);
   }
 };
 
@@ -245,24 +244,22 @@ export const remove = async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
     if (!id) {
-      return res.status(400).json({ message: "Id is required" });
+      return sendFail(res, "Id is required", "VALIDATION_ERROR", null, 400);
     }
 
-    const { rows } = await client.query("DELETE FROM goals WHERE id = $1", [
+    const { rows } = await client.query("DELETE FROM goals WHERE id = $1 RETURNING *", [
       id,
     ]);
     const data = rows[0];
 
     // if there is no data, it will return undefined.
     if (!data) {
-      return res
-        .status(404)
-        .json({ message: "The Id to delete was not found" });
+      return sendFail(res, "The Id to delete was not found", "NOT_FOUND", null, 404);
     }
 
-    res.send("Deleted");
+    return sendSuccess(res, null, "Deleted");
   } catch (error) {
     console.log(error);
-    res.status(500).json({ message: "Internal server error" });
+    return sendError(res);
   }
 };
