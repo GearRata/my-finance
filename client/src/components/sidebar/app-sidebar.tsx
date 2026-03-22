@@ -12,11 +12,10 @@ import {
   SidebarRail,
   useSidebar,
 } from "@/components/ui/sidebar";
-import { NavMain } from "@/features/dashboard/components/sidebar/nav-main";
-import { NavUser } from "@/features/dashboard/components/sidebar/nav-user";
+import { NavMain } from "@/components/sidebar/nav-main";
+import { NavUser } from "@/components/sidebar/nav-user";
 import Image from "next/image";
-import { PanelLeft } from "lucide-react";
-import dollar from "../../public/assets/images/dollar.png";
+import dollar from "../../../public/assets/images/dollar.png";
 import { MainNavigation } from "@/config/navigation";
 
 const data = {
@@ -28,12 +27,6 @@ const data = {
 };
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
-<<<<<<< HEAD
-=======
-  const { state, toggleSidebar } = useSidebar();
-  const isCollapsed = state === "collapsed";
-
->>>>>>> feat/dashboard
   return (
     <Sidebar collapsible="icon" {...props}>
       <SidebarHeader className="flex">

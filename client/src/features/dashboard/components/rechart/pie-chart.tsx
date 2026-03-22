@@ -16,12 +16,14 @@ import {
   PieSectorDataItem,
   Tooltip,
 } from "recharts";
+import { Skeleton } from "@/components/ui/skeleton";
 
 import type { PieType } from "../../types/dashboard.types";
 
 interface PieTypeProps {
   pieData: PieType[];
   isAnimationActive?: boolean;
+  loading: boolean;
 }
 
 const renderActiveShape = (props: PieSectorDataItem) => {
@@ -110,8 +112,9 @@ const renderActiveShape = (props: PieSectorDataItem) => {
 export default function ShapePieChart({
   pieData,
   isAnimationActive = true,
+  loading,
 }: PieTypeProps) {
-  return (
+  return loading ? (
     <Card className="flex flex-col">
       <CardHeader className="items-center pb-0">
         <CardTitle>สัดส่วนรายจ่าย</CardTitle>
@@ -119,31 +122,37 @@ export default function ShapePieChart({
       </CardHeader>
       <CardContent className="flex-1 pb-0">
         <div className="h-[400px] w-full min-w-[300px]">
-          {pieData.length > 0 ? (
-            <ResponsiveContainer
-              width="100%"
-              height="100%"
-              initialDimension={{ width: 320, height: 200 }}
-            >
-              <PieChart>
-                <Pie
-                  activeShape={renderActiveShape}
-                  data={pieData}
-                  cx="50%"
-                  cy="50%"
-                  innerRadius="65%"
-                  outerRadius="85%" // ขยายรัศมีให้ใหญ่ขึ้น
-                  dataKey="value"
-                  isAnimationActive={isAnimationActive}
-                />
-                <Tooltip content={() => null} />
-              </PieChart>
-            </ResponsiveContainer>
-          ) : (
-            <div className="flex h-full items-center justify-center text-muted-foreground">
-              ยังไม่มีข้อมูลค่าใช้จ่ายในเดือนนี้
-            </div>
-          )}
+          <Skeleton className="h-full w-full" />
+        </div>
+      </CardContent>
+    </Card>
+  ) : (
+    <Card className="flex flex-col">
+      <CardHeader className="items-center pb-0">
+        <CardTitle>สัดส่วนรายจ่าย</CardTitle>
+        <CardDescription>แยกตามหมวดหมู่เดือนปัจจุบัน</CardDescription>
+      </CardHeader>
+      <CardContent className="flex-1 pb-0">
+        <div className="h-[400px] w-full min-w-[300px]">
+          <ResponsiveContainer
+            width="100%"
+            height="100%"
+            initialDimension={{ width: 320, height: 200 }}
+          >
+            <PieChart>
+              <Pie
+                activeShape={renderActiveShape}
+                data={pieData}
+                cx="50%"
+                cy="50%"
+                innerRadius="65%"
+                outerRadius="85%" // ขยายรัศมีให้ใหญ่ขึ้น
+                dataKey="value"
+                isAnimationActive={isAnimationActive}
+              />
+              <Tooltip content={() => null} />
+            </PieChart>
+          </ResponsiveContainer>
         </div>
       </CardContent>
     </Card>

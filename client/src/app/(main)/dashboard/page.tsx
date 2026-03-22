@@ -28,8 +28,10 @@ export default function page() {
     balance: 0,
   });
   const [analytics, setAnalytics] = useState<Analytics>({ trend: [], pie: [] });
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
+    setIsLoading(true);
     const fetchData = async () => {
       try {
         const [total, analytics, transactions, goals] = await Promise.all([
@@ -44,6 +46,8 @@ export default function page() {
         setAnalytics(analytics.data);
       } catch (error) {
         console.error("❌ ดึงข้อมูลพลาด:", error);
+      } finally {
+        setIsLoading(false);
       }
     };
     fetchData();
@@ -54,12 +58,12 @@ export default function page() {
       <div className="text-5xl py-2">
         <h1>Overview</h1>
       </div>
-      <SectionCards data={total} />
+      <SectionCards data={total} loading={isLoading} />
       <div className="grid gap-4 lg:grid-cols-2">
-        <StackedAreaChart trendData={analytics.trend} />
-        <ShapePieChart pieData={analytics.pie} />
-        <TableTranscation data={transaction} />
-        <SectionGoal data={goal} />
+        <StackedAreaChart trendData={analytics.trend} loading={isLoading} />
+        <ShapePieChart pieData={analytics.pie} loading={isLoading} />
+        <TableTranscation data={transaction} loading={isLoading} />
+        <SectionGoal data={goal} loading={isLoading} />
       </div>
     </div>
   );

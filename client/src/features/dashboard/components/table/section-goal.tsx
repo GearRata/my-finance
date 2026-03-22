@@ -7,23 +7,33 @@ import {
 } from "@/components/ui/card";
 import { Field, FieldLabel } from "@/components/ui/field";
 import { Progress } from "@/components/ui/progress";
+import { Skeleton } from "@/components/ui/skeleton";
 import type { Goals } from "../../types/dashboard.types";
-
-// รูปแบบสกุลเงิน
-const formatCurrency = (value: number) => {
-  return new Intl.NumberFormat("th-TH", {
-    style: "currency",
-    currency: "THB",
-    minimumFractionDigits: 0,
-  }).format(value);
-};
+import { formatCurrency } from "@/lib/utils";
 
 interface GoalProps {
   data: Goals;
+  loading: boolean;
 }
 
-export default function SectionGoal({ data }: GoalProps) {
-  return (
+export default function SectionGoal({ data, loading }: GoalProps) {
+  return loading ? (
+    <Card>
+      <CardHeader>
+        <CardTitle>เป้าหมายการออม</CardTitle>
+        <CardDescription>ความคืบหน้าเป้าหมายหลัก</CardDescription>
+      </CardHeader>
+      <CardContent>
+        <div className="space-y-6">
+          {Array.from({ length: 5 }).map((_, i) => (
+            <Field key={i} className="w-full space-y-2">
+              <Skeleton className="h-14 w-full" />
+            </Field>
+          ))}
+        </div>
+      </CardContent>
+    </Card>
+  ) : (
     <Card>
       <CardHeader>
         <CardTitle>เป้าหมายการออม</CardTitle>
