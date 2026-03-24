@@ -28,7 +28,13 @@ export const register = async (req: Request, res: Response) => {
     }
 
     if (errors.length > 0) {
-      return sendFail(res, "Invalid Request data", "VALIDATION_ERROR", errors, 400);
+      return sendFail(
+        res,
+        "Invalid Request data",
+        "VALIDATION_ERROR",
+        errors,
+        400,
+      );
     }
 
     // Check if email already exists (ตรวจสอบว่าอีเมลนี้มีอยู่แล้วหรือไม่)
@@ -93,7 +99,13 @@ export const login = async (req: Request, res: Response) => {
     }
 
     if (errors.length > 0) {
-      return sendFail(res, "Invalid Request data", "VALIDATION_ERROR", errors, 400);
+      return sendFail(
+        res,
+        "Invalid Request data",
+        "VALIDATION_ERROR",
+        errors,
+        400,
+      );
     }
 
     // Check if user exists
@@ -116,7 +128,13 @@ export const login = async (req: Request, res: Response) => {
     // Check if password is correct
     const isMatch = await bcrypt.compare(password, user.password);
     if (!isMatch) {
-      return sendFail(res, "Password is not correct", "INVALID_PASSWORD", null, 400);
+      return sendFail(
+        res,
+        "Password is not correct",
+        "INVALID_PASSWORD",
+        null,
+        400,
+      );
     }
 
     // Create Payload
@@ -138,9 +156,9 @@ export const login = async (req: Request, res: Response) => {
         // Response ให้เก็บ cookie ไว้บน Browser
         res.cookie("token", token, {
           httpOnly: true,
-          secure: true,
+          secure: false,
           maxAge: 5 * 60 * 60 * 1000, // 5 hours in milliseconds
-          sameSite: "none",
+          sameSite: "lax",
         });
         return sendSuccess(res, payload, "Login Sucess");
         // res.json({ message: "Login Success", payload });
@@ -155,8 +173,8 @@ export const logout = async (req: Request, res: Response) => {
   try {
     res.clearCookie("token", {
       httpOnly: true,
-      secure: true,
-      sameSite: "none",
+      secure: false,
+      sameSite: "lax",
     });
     return sendSuccess(res, null, "Logout Success");
   } catch (error) {

@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import {
   fetchTransactions,
   fetchGoals,
-  fetchDashboardSummary,
+  fetchTotalCashFlow,
   fetchDashboardAnalytics,
 } from "@/features/dashboard/services/dashboard.services";
 import type {
@@ -28,14 +28,14 @@ export default function page() {
     balance: 0,
   });
   const [analytics, setAnalytics] = useState<Analytics>({ trend: [], pie: [] });
-  const [isLoading, setIsLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
     setIsLoading(true);
     const fetchData = async () => {
       try {
         const [total, analytics, transactions, goals] = await Promise.all([
-          fetchDashboardSummary(),
+          fetchTotalCashFlow(),
           fetchDashboardAnalytics(),
           fetchTransactions(5),
           fetchGoals(4),

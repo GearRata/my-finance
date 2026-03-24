@@ -33,7 +33,7 @@ export const fetchGoals = async (count: number) => {
   }
 };
 
-export const fetchDashboardSummary = async () => {
+export const fetchTotalCashFlow = async () => {
   try {
     const response = await apiClient.get("/transactions/total");
     return response.data;

@@ -13,14 +13,32 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 
-export function SectionCards() {
+import { Skeleton } from "@/components/ui/skeleton";
+import { formatCurrency } from "@/lib/utils";
+
+export function SectionCards({ data, count, loading }: any) {
+  console.log(data, count, loading);
+  const totalIncome = data.total_income || 0;
+  const totalExpense = data.total_expense || 0;
+  const totalNumber = count.number || 0;
   return (
-    <div className="grid grid-cols-2 gap-4 lg:grid-cols-4 ">
+    <div className="grid grid-cols-1 gap-4 lg:grid-cols-3 ">
+      <Card className="@container/card">
+        <CardHeader>
+          <CardDescription>Number of Transactions</CardDescription>
+          <CardTitle className="text-3xl font-semibold tabular-nums @[250px]/card:text-4xl">
+            {totalNumber}
+          </CardTitle>
+          <CardAction>
+            <IconWallet size={64} />
+          </CardAction>
+        </CardHeader>
+      </Card>
       <Card className="@container/card">
         <CardHeader>
           <CardDescription>Total Income</CardDescription>
           <CardTitle className="text-3xl font-semibold tabular-nums @[250px]/card:text-4xl">
-            $1,250.00
+            {formatCurrency(totalIncome)}
           </CardTitle>
           <CardAction>
             <IconTrendingUp size={64} />
@@ -31,32 +49,10 @@ export function SectionCards() {
         <CardHeader>
           <CardDescription>Total Expense</CardDescription>
           <CardTitle className="text-3xl font-semibold tabular-nums @[250px]/card:text-4xl">
-            1,234
+            {formatCurrency(totalExpense)}
           </CardTitle>
           <CardAction>
             <IconTrendingDown size={64} />
-          </CardAction>
-        </CardHeader>
-      </Card>
-      <Card className="@container/card">
-        <CardHeader>
-          <CardDescription>Balance</CardDescription>
-          <CardTitle className="text-3xl font-semibold tabular-nums @[250px]/card:text-4xl">
-            45,678
-          </CardTitle>
-          <CardAction>
-            <IconWallet size={64} />
-          </CardAction>
-        </CardHeader>
-      </Card>
-      <Card className="@container/card">
-        <CardHeader>
-          <CardDescription>Savings Rate</CardDescription>
-          <CardTitle className="text-3xl font-semibold tabular-nums @[250px]/card:text-4xl">
-            4.5%
-          </CardTitle>
-          <CardAction>
-            <IconTrendingUp />
           </CardAction>
         </CardHeader>
       </Card>

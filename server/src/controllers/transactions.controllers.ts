@@ -4,7 +4,7 @@ import { sendSuccess, sendFail, sendError } from "../utils/apiResponse.js";
 
 export const list = async (req: Request, res: Response) => {
   try {
-    const { count } = req.params;
+    const { limit } = req.params;
 
     const query = `
             SELECT 
@@ -31,8 +31,97 @@ export const list = async (req: Request, res: Response) => {
             LIMIT $1
         `;
 
-    const { rows } = await client.query(query, [count]);
-    return sendSuccess(res, rows, `${count} Recent Transactions`);
+    const { rows } = await client.query(query, [limit]);
+    return sendSuccess(res, rows, `${limit} Recent Transactions`);
+  } catch (error) {
+    console.log(error);
+    return sendError(res);
+  }
+};
+
+export const pagination = async (req: Request, res: Response) => {
+  try {
+    const user_id = req.user.id;
+    const type = (req.query.type as string) || "all";
+    const page = parseInt(req.query.page as string) || 1;
+    const limit = parseInt(req.query.limit as string) || 10;
+    const offset = (page - 1) * limit;
+
+    const conditions: string[] = ["t.user_id = $1"];
+    const params: (number | string)[] = [user_id];
+
+    if (type !== "all") {
+      conditions.push(`c.type = $${params.length + 1}`);
+      params.push(type);
+    }
+
+    const whereClause = conditions.join(" AND ");
+    console.log("whereClause => ", whereClause);
+    console.log("conditions => ", conditions);
+    console.log("params => ", params);
+
+    const countQuery = `
+    SELECT 
+      COUNT(*) as total
+    FROM transactions t
+    LEFT JOIN categories c ON t.category_id = c.id
+    WHERE ${whereClause}
+  `;
+
+    const result = await client.query(countQuery, params);
+    const totalItems = parseInt(result.rows[0].total);
+    const totalPages = Math.ceil(totalItems / limit);
+    console.log("totalItems => ", totalItems);
+    params.push(limit, offset);
+    const dataQuery = `
+      SELECT
+        t.*,
+        jsonb_build_object(
+          'id', a.id,
+          'name', a.name,
+          'balance', a.balance
+        ) AS accounts,
+        jsonb_build_object(
+          'id', c.id,
+          'name', c.name,
+          'type', c.type
+        ) AS categories
+      FROM transactions t
+      LEFT JOIN accounts a ON t.account_id = a.id
+      LEFT JOIN categories c ON t.category_id = c.id
+      WHERE ${whereClause}
+      ORDER BY t.transaction_date DESC
+      LIMIT $${params.length - 1} OFFSET $${params.length}
+    `;
+
+    const { rows } = await client.query(dataQuery, params);
+    return sendSuccess(res, {
+      transactions: rows,
+      pagination: {
+        currentPage: page,
+        totalPages,
+        totalItems,
+        itemsPerPage: limit,
+      },
+    });
+  } catch (error) {
+    console.log(error);
+    return sendError(res);
+  }
+};
+
+export const count = async (req: Request, res: Response) => {
+  try {
+    const query = `
+      SELECT COUNT(*) as number
+      FROM transactions t
+      WHERE transaction_date >= date_trunc('month', current_date)
+      AND transaction_date <  date_trunc('month', current_date) + interval '1 month'
+    `;
+    const { rows } = await client.query(query);
+    const data = rows[0];
+
+    return sendSuccess(res, data, "Total number of transactions this month");
   } catch (error) {
     console.log(error);
     return sendError(res);
@@ -514,7 +603,7 @@ export const total = async (req: Request, res: Response) => {
 
     const data = changType[0];
 
-    return sendSuccess(res, data, "Retrieved totals successfully");
+    return sendSuccess(res, data, "Total Cash In-Flow/Out-Flow");
   } catch (error) {
     console.log(error);
     return sendError(res, "Internal server error occurred while fetching data");

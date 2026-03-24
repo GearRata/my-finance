@@ -24,7 +24,7 @@ interface TotalProps {
 }
 
 export function SectionCards({ data, loading }: TotalProps) {
-  const totalIncome = data.total_income;
+  const totalIncome = data.total_income || 0;
   const totalExpense = data.total_expense || 0;
   const balance = data.balance || 0;
   const savingsRate =
