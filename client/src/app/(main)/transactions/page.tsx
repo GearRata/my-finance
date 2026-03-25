@@ -12,29 +12,53 @@ import {
   fetchCount,
   fetchTotalCashFlow,
   fetchTransactions,
+  fetchCatogories,
 } from "@/features/transactions/services/transaction.services";
 
+import type {
+  Count,
+  Total,
+  fetchTransaction,
+  Pagination,
+  Categories,
+} from "@/features/transactions/types/transaction.types";
+
 export default function page() {
-  const [count, setCount] = useState<any>({
+  const [count, setCount] = useState<Count>({
     total_income: 0,
     total_expense: 0,
     balance: 0,
   });
-  const [total, setTotal] = useState<any>({ number: 0 });
-  const [transactions, setTransactions] = useState<any>([]);
-  const [isLoading, setIsLoading] = useState(true);
+  const [total, setTotal] = useState<Total>({ number: 0 });
+  const [type, setType] = useState<string>("all");
+  const [page, setPage] = useState<number>(1);
+  const [search, setSearch] = useState<string>("");
+  const [transactions, setTransactions] = useState<fetchTransaction[]>([]);
+  const [pagination, setPagination] = useState<Pagination>({
+    currentPage: 1,
+    totalPages: 1,
+    totalItems: 0,
+    itemsPerPage: 10,
+  });
+  const [categoryList, setCategoryList] = useState<Categories[]>([]);
+  const [category, setCategory] = useState<string>("all");
+  const [isLoading, setIsLoading] = useState<boolean>(true);
 
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const [total, count, transaction] = await Promise.all([
+        const [total, count, transaction, categories] = await Promise.all([
           fetchTotalCashFlow(),
           fetchCount(),
-          fetchTransactions(10),
+          fetchTransactions({ type, category, page, search, limit: 10 }),
+          fetchCatogories(),
         ]);
+
         setTotal(total.data);
         setCount(count.data);
         setTransactions(transaction.data);
+        setPagination(transaction.pagination);
+        setCategoryList(categories.data);
       } catch (error) {
         console.error("❌ ดึงข้อมูลพลาด:", error);
       } finally {
@@ -42,16 +66,42 @@ export default function page() {
       }
     };
     fetchData();
-  }, []);
+  }, [type, category, page, search]);
+
+  const handleSearch = (keyword: string) => {
+    setSearch(keyword);
+    setPage(1);
+  };
+
+  const handleTypeChange = (newType: string) => {
+    setType(newType);
+    setPage(1);
+  };
+
+  const handleCategoryChange = (newCategory: string) => {
+    setCategory(newCategory);
+    setPage(1);
+  };
 
   return (
     <div>
       <div className="flex flex-1 flex-col gap-4 p-4 ">
         <SectionHeader />
         <SectionCards data={total} count={count} loading={isLoading} />
-        <SectionCategories />
+        <SectionCategories
+          type={type}
+          onTypeChange={handleTypeChange}
+          category={category}
+          onSearch={handleSearch}
+          onCategoryChange={handleCategoryChange}
+          categoryList={categoryList}
+        />
         <DataTable columns={columns} data={transactions} />
-        <SectionPagination />
+        <SectionPagination
+          currentPage={pagination.currentPage}
+          totalPages={pagination.totalPages}
+          onPageChange={setPage}
+        />
       </div>
     </div>
   );

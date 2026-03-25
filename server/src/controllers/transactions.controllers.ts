@@ -43,7 +43,9 @@ export const pagination = async (req: Request, res: Response) => {
   try {
     const user_id = req.user.id;
     const type = (req.query.type as string) || "all";
+    const category = (req.query.category as string) || "all";
     const page = parseInt(req.query.page as string) || 1;
+    const search = (req.query.search as string) || "";
     const limit = parseInt(req.query.limit as string) || 10;
     const offset = (page - 1) * limit;
 
@@ -53,6 +55,16 @@ export const pagination = async (req: Request, res: Response) => {
     if (type !== "all") {
       conditions.push(`c.type = $${params.length + 1}`);
       params.push(type);
+    }
+
+    if (category !== "all") {
+      conditions.push(`c.id = $${params.length + 1}`);
+      params.push(category);
+    }
+
+    if (search) {
+      conditions.push(`t.note ILIKE $${params.length + 1}`);
+      params.push(`%${search}%`);
     }
 
     const whereClause = conditions.join(" AND ");
@@ -89,14 +101,17 @@ export const pagination = async (req: Request, res: Response) => {
       FROM transactions t
       LEFT JOIN accounts a ON t.account_id = a.id
       LEFT JOIN categories c ON t.category_id = c.id
-      WHERE ${whereClause}
+      WHERE ${whereClause} 
+      AND transaction_date >= date_trunc('month', current_date) 
+      AND transaction_date <  date_trunc('month', current_date) + interval '1 month'
       ORDER BY t.transaction_date DESC
       LIMIT $${params.length - 1} OFFSET $${params.length}
     `;
 
     const { rows } = await client.query(dataQuery, params);
-    return sendSuccess(res, {
-      transactions: rows,
+    return res.json({
+      status: "success",
+      data: rows,
       pagination: {
         currentPage: page,
         totalPages,
@@ -111,14 +126,15 @@ export const pagination = async (req: Request, res: Response) => {
 };
 
 export const count = async (req: Request, res: Response) => {
+  const user_id = req.user.id;
   try {
     const query = `
       SELECT COUNT(*) as number
       FROM transactions t
-      WHERE transaction_date >= date_trunc('month', current_date)
+      WHERE transaction_date >= date_trunc('month', current_date) AND t.user_id = $1
       AND transaction_date <  date_trunc('month', current_date) + interval '1 month'
     `;
-    const { rows } = await client.query(query);
+    const { rows } = await client.query(query, [user_id]);
     const data = rows[0];
 
     return sendSuccess(res, data, "Total number of transactions this month");

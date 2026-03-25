@@ -31,8 +31,8 @@ export default function page() {
   const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
-    setIsLoading(true);
     const fetchData = async () => {
+      setIsLoading(true);
       try {
         const [total, analytics, transactions, goals] = await Promise.all([
           fetchTotalCashFlow(),

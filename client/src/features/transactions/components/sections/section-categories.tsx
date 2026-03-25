@@ -16,8 +16,27 @@ import { Button } from "@/components/ui/button";
 import { ButtonGroup } from "@/components/ui/button-group";
 import { Input } from "@/components/ui/input";
 
-export function SectionCategories() {
-  const [type, setType] = useState("all");
+type Categories = {
+  id: number;
+  name: string;
+};
+interface SectionTypeProps {
+  type: string;
+  onTypeChange: (type: string) => void;
+  category: string;
+  onSearch: (keyword: string) => void;
+  onCategoryChange: (category: string) => void;
+  categoryList: Categories[];
+}
+
+export function SectionCategories({
+  type,
+  onTypeChange,
+  category,
+  onSearch,
+  onCategoryChange,
+  categoryList,
+}: SectionTypeProps) {
   return (
     <Card>
       <CardContent className="grid grid-cols-1 lg:grid-cols-3 lg:gap-4">
@@ -25,17 +44,27 @@ export function SectionCategories() {
           <div className="flex items-center justify-center">
             <IconFilter size={32} />
             <ButtonGroup className="w-full pl-4">
-              <Input placeholder="Search..." />
-              <Button variant="outline" aria-label="Search">
+              <Button variant="outline" className="pointer-events-none">
                 <IconSearch />
               </Button>
+              <Input
+                placeholder="Search..."
+                onChange={(e) => onSearch(e.target.value)}
+              />
             </ButtonGroup>
           </div>
         </section>
         <section className="grid grid-cols-2 gap-4">
-          <Select value={type}>
+          <Select
+            value={type}
+            onValueChange={(value) => value && onTypeChange(value)}
+          >
             <SelectTrigger className="w-full ">
-              <SelectValue />
+              <SelectValue>
+                {type === "all" && "All Type"}
+                {type === "income" && "Income"}
+                {type === "expense" && "Expense"}
+              </SelectValue>
             </SelectTrigger>
             <SelectContent alignItemWithTrigger={false}>
               <SelectGroup>
@@ -46,12 +75,26 @@ export function SectionCategories() {
             </SelectContent>
           </Select>
 
-          <Select>
+          <Select
+            value={category}
+            onValueChange={(value) => value && onCategoryChange(value)}
+          >
             <SelectTrigger className="w-full">
-              <SelectValue />
+              <SelectValue>
+                {category === "all"
+                  ? "All Categories"
+                  : categoryList.find((c) => String(c.id) === category)?.name}
+              </SelectValue>
             </SelectTrigger>
             <SelectContent alignItemWithTrigger={false}>
-              <SelectGroup></SelectGroup>
+              <SelectGroup>
+                <SelectItem value="all">All Categories</SelectItem>
+                {categoryList.map((cat) => (
+                  <SelectItem key={cat.id} value={String(cat.id)}>
+                    {cat.name}
+                  </SelectItem>
+                ))}
+              </SelectGroup>
             </SelectContent>
           </Select>
         </section>

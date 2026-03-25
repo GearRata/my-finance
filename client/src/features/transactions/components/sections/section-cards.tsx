@@ -17,7 +17,6 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { formatCurrency } from "@/lib/utils";
 
 export function SectionCards({ data, count, loading }: any) {
-  console.log(data, count, loading);
   const totalIncome = data.total_income || 0;
   const totalExpense = data.total_expense || 0;
   const totalNumber = count.number || 0;
