@@ -278,7 +278,8 @@ export const create = async (req: Request, res: Response) => {
 export const update = async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
-    const { amount, note, user_id, account_id, category_id, transaction_date } =
+    const user_id = req.user.id;
+    const { amount, note, account_id, category_id, transaction_date } =
       req.body;
 
     if (
@@ -317,6 +318,7 @@ export const update = async (req: Request, res: Response) => {
       [account_id, user_id],
     );
 
+    console.log("accountResult", accountResult);
     const account = accountResult.rows[0] as { id: number; balance: number };
     if (!account) {
       return sendFail(res, "Account not found", "NOT_FOUND", null, 404);

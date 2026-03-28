@@ -57,3 +57,28 @@ export const fetchCatogories = async () => {
     throw error;
   }
 };
+
+export const CreateTransaction = async (payload: any) => {
+  try {
+    const response = await apiClient.post("/transactions", payload);
+    return response.data;
+  } catch (error) {
+    throw error;
+  }
+};
+
+export const UpdateTransaction = async ({ payload, id }: any) => {
+  try {
+    const response = await apiClient.put(`/transactions/${id}`, payload);
+    return response.data;
+  } catch (error) {
+    throw error;
+  }
+};
+
+export const DeleteTransaction = async (id: number) => {
+  try {
+    const response = await apiClient.delete(`/transactions/${id}`);
+    return response.data;
+  } catch (error) {}
+};

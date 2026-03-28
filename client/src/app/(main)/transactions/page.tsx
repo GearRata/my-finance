@@ -1,12 +1,12 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { SectionHeader } from "@/features/transactions/components/sections/section-header";
 import { SectionCards } from "@/features/transactions/components/sections/section-cards";
 import { SectionCategories } from "@/features/transactions/components/sections/section-categories";
 import { DataTable } from "@/features/transactions/components/table/data-table";
 import { SectionPagination } from "@/features/transactions/components/sections/section-pagination";
-import { columns } from "@/features/transactions/components/table/colums";
+import { getColumns } from "@/features/transactions/components/table/colums";
 
 import {
   fetchCount,
@@ -23,13 +23,14 @@ import type {
   Categories,
 } from "@/features/transactions/types/transaction.types";
 
-export default function page() {
+export default function Page() {
   const [count, setCount] = useState<Count>({
     total_income: 0,
     total_expense: 0,
     balance: 0,
   });
   const [total, setTotal] = useState<Total>({ number: 0 });
+  const [account, setAccount] = useState<any>("");
   const [type, setType] = useState<string>("all");
   const [page, setPage] = useState<number>(1);
   const [search, setSearch] = useState<string>("");
@@ -47,6 +48,7 @@ export default function page() {
   useEffect(() => {
     const fetchData = async () => {
       try {
+        setIsLoading(true);
         const [total, count, transaction, categories] = await Promise.all([
           fetchTotalCashFlow(),
           fetchCount(),
@@ -55,6 +57,7 @@ export default function page() {
         ]);
 
         setTotal(total.data);
+        setAccount(total.data);
         setCount(count.data);
         setTransactions(transaction.data);
         setPagination(transaction.pagination);
@@ -68,25 +71,25 @@ export default function page() {
     fetchData();
   }, [type, category, page, search]);
 
-  const handleSearch = (keyword: string) => {
+  const handleSearch = useCallback((keyword: string) => {
     setSearch(keyword);
     setPage(1);
-  };
+  }, []);
 
-  const handleTypeChange = (newType: string) => {
+  const handleTypeChange = useCallback((newType: string) => {
     setType(newType);
     setPage(1);
-  };
+  }, []);
 
-  const handleCategoryChange = (newCategory: string) => {
+  const handleCategoryChange = useCallback((newCategory: string) => {
     setCategory(newCategory);
     setPage(1);
-  };
+  }, []);
 
   return (
     <div>
       <div className="flex flex-1 flex-col gap-4 p-4 ">
-        <SectionHeader />
+        <SectionHeader categoryList={categoryList} accountList={account} />
         <SectionCards data={total} count={count} loading={isLoading} />
         <SectionCategories
           type={type}
@@ -96,7 +99,11 @@ export default function page() {
           onCategoryChange={handleCategoryChange}
           categoryList={categoryList}
         />
-        <DataTable columns={columns} data={transactions} />
+        <DataTable
+          columns={getColumns({ categoryList, account })}
+          data={transactions}
+          loading={isLoading}
+        />
         <SectionPagination
           currentPage={pagination.currentPage}
           totalPages={pagination.totalPages}

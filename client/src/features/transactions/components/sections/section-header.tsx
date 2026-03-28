@@ -13,7 +13,6 @@ import {
 } from "@/components/ui/dialog";
 import {
   Select,
-  SelectLabel,
   SelectContent,
   SelectGroup,
   SelectItem,
@@ -38,6 +37,23 @@ import { Field, FieldLabel, FieldGroup } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
+import { CreateTransaction } from "../../services/transaction.services";
+
+type Categories = {
+  id: number;
+  name: string;
+  type: string;
+};
+
+type Account = {
+  account_id: number;
+  account_name: string;
+};
+
+interface SectionTypeProps {
+  categoryList: Categories[];
+  accountList: Account;
+}
 
 function formatDate(date: Date | undefined) {
   if (!date) {
@@ -56,45 +72,76 @@ function isValidDate(date: Date | undefined) {
   return !isNaN(date.getTime());
 }
 
-export function SectionHeader() {
+export function SectionHeader({ categoryList, accountList }: SectionTypeProps) {
   const [type, setType] = useState("income");
-  const [amount, setAmount] = useState();
-  const [category, setCategory] = useState<string>("");
+  const [amount, setAmount] = useState<string>("");
+  const [categoryId, setCategory] = useState<string>("");
   const [note, setNote] = useState<string>("");
 
   const [open, setOpen] = useState(false);
-  const [date, setDate] = useState<Date | undefined>(new Date("2025-06-01"));
+  const [date, setDate] = useState<Date | undefined>(new Date());
   const [month, setMonth] = useState<Date | undefined>(date);
   const [value, setValue] = useState(formatDate(date));
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    const date = new Date(value);
+    try {
+      const payload = {
+        account_id: Number(accountList.account_id),
+        amount: Number(amount),
+        category_id: Number(categoryId),
+        note: note,
+        transaction_date: date?.toISOString(),
+      };
+
+      await CreateTransaction(payload);
+    } catch (error) {}
+  };
+
+  const filteredCategories = categoryList.filter((cat) => cat.type === type);
+
   return (
     <div className="text-5xl py-2">
       <div className="flex items-center justify-between ">
         <h1>Transacitions</h1>
         <Dialog>
-          <form>
-            <DialogTrigger
-              render={
-                <Button variant="outline" className="text-xl py-5">
-                  + Add Transaction
-                </Button>
-              }
-            />
-            <DialogContent className="sm:max-w-sm">
+          <DialogTrigger
+            render={
+              <Button variant="outline" className="text-xl py-5">
+                + Add Transaction
+              </Button>
+            }
+          />
+
+          <DialogContent className="sm:max-w-sm">
+            <form onSubmit={handleSubmit}>
               <DialogHeader>
                 <DialogTitle>Add New Transaction</DialogTitle>
                 <DialogDescription>
                   Record your new income or expenses.
                 </DialogDescription>
               </DialogHeader>
-              <FieldGroup>
+              <FieldGroup className="py-6">
                 {/* Type */}
                 <Field>
                   <Label htmlFor="name-1">Type</Label>
-                  <Select value={type}>
+                  <Select
+                    value={type}
+                    onValueChange={(value) => {
+                      if (value) {
+                        setType(value);
+                        setCategory("");
+                      }
+                    }}
+                  >
                     <SelectTrigger className="w-full">
-                      <SelectValue />
+                      <SelectValue>
+                        {type === "income" && "Income"}
+                        {type === "expense" && "Expense"}
+                      </SelectValue>
                     </SelectTrigger>
-                    <SelectContent>
+                    <SelectContent alignItemWithTrigger={false}>
                       <SelectGroup>
                         <SelectItem value="income">Income</SelectItem>
                         <SelectItem value="expense">Expense</SelectItem>
@@ -109,22 +156,31 @@ export function SectionHeader() {
                     type="number"
                     placeholder="0"
                     value={amount}
-                    onChange={(e) => {
-                      e.target.value;
-                    }}
+                    onChange={(e) => setAmount(e.target.value)}
                   />
                 </Field>
-
+                {/* Categories */}
                 <Field>
                   <Label htmlFor="name-1">Category</Label>
-                  <Select>
+                  <Select
+                    value={categoryId}
+                    onValueChange={(value) => value && setCategory(value)}
+                  >
                     <SelectTrigger className="w-full ">
-                      <SelectValue placeholder="Select Category" />
+                      <SelectValue placeholder="Select Category">
+                        {
+                          categoryList.find((c) => String(c.id) === categoryId)
+                            ?.name
+                        }
+                      </SelectValue>
                     </SelectTrigger>
                     <SelectContent alignItemWithTrigger={false}>
                       <SelectGroup>
-                        <SelectItem value="income">Income</SelectItem>
-                        <SelectItem value="expense">Expense</SelectItem>
+                        {filteredCategories.map((cat) => (
+                          <SelectItem key={cat.id} value={String(cat.id)}>
+                            {cat.name}
+                          </SelectItem>
+                        ))}
                       </SelectGroup>
                     </SelectContent>
                   </Select>
@@ -139,14 +195,12 @@ export function SectionHeader() {
                   />
                 </Field>
                 <Field className="">
-                  <FieldLabel htmlFor="date-required">
-                    Subscription Date
-                  </FieldLabel>
+                  <FieldLabel htmlFor="date-required">Date</FieldLabel>
                   <InputGroup>
                     <InputGroupInput
                       id="date-required"
                       value={value}
-                      placeholder="June 01, 2025"
+                      placeholder=""
                       onChange={(e) => {
                         const date = new Date(e.target.value);
                         setValue(e.target.value);
@@ -206,8 +260,8 @@ export function SectionHeader() {
                 />
                 <Button type="submit">Save changes</Button>
               </DialogFooter>
-            </DialogContent>
-          </form>
+            </form>
+          </DialogContent>
         </Dialog>
       </div>
     </div>

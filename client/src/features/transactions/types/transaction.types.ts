@@ -16,6 +16,7 @@ export type Pagination = {
 export type Categories = {
   id: number;
   name: string;
+  type: string;
 };
 
 export type Count = {

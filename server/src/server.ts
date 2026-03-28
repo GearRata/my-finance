@@ -1,7 +1,9 @@
 import express from "express";
 import morgan from "morgan";
 import cors from "cors";
+import helmet from "helmet";
 import cookieParser from "cookie-parser";
+import rateLimit from "express-rate-limit";
 import authRoutes from "./routes/auth.routes.js";
 import categoriesRoutes from "./routes/categories.routes.js";
 import accountsRoutes from "./routes/accounts.routes.js";
@@ -18,6 +20,7 @@ const port = 5000;
 app.use(morgan("dev"));
 app.use(express.json());
 app.use(cookieParser());
+app.use(helmet());
 app.use(cors({ origin: true, credentials: true }));
 
 connectDB();

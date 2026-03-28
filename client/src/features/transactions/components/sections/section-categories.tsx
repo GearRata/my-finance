@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import {
   Select,
@@ -37,6 +37,19 @@ export function SectionCategories({
   onCategoryChange,
   categoryList,
 }: SectionTypeProps) {
+  const [search, setSearch] = useState("");
+
+  // Debounce
+  useEffect(() => {
+    const handler = setTimeout(() => {
+      onSearch(search);
+    }, 500);
+
+    return () => {
+      clearTimeout(handler);
+    };
+  }, [search, onSearch]);
+
   return (
     <Card>
       <CardContent className="grid grid-cols-1 lg:grid-cols-3 lg:gap-4">
@@ -49,7 +62,8 @@ export function SectionCategories({
               </Button>
               <Input
                 placeholder="Search..."
-                onChange={(e) => onSearch(e.target.value)}
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
               />
             </ButtonGroup>
           </div>

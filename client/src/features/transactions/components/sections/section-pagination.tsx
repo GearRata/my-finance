@@ -45,7 +45,9 @@ export function SectionPagination({
       <PaginationContent>
         <PaginationItem>
           <PaginationPrevious
-            onClick={() => onPageChange(currentPage - 1)}
+            onClick={() => {
+              onPageChange(currentPage - 1);
+            }}
             className={
               currentPage <= 1
                 ? "pointer-events-none opacity-50"
@@ -63,7 +65,9 @@ export function SectionPagination({
             <PaginationItem key={pageNum}>
               <PaginationLink
                 isActive={pageNum === currentPage}
-                onClick={() => onPageChange(pageNum)}
+                onClick={() => {
+                  onPageChange(pageNum);
+                }}
                 className="cursor-pointer"
               >
                 {pageNum}
@@ -74,7 +78,9 @@ export function SectionPagination({
 
         <PaginationItem>
           <PaginationNext
-            onClick={() => onPageChange(currentPage + 1)}
+            onClick={() => {
+              onPageChange(currentPage + 1);
+            }}
             className={
               currentPage >= totalPages
                 ? "pointer-events-none opacity-50"
