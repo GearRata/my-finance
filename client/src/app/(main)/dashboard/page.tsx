@@ -19,7 +19,7 @@ import ShapePieChart from "@/features/dashboard/components/rechart/pie-chart";
 import { TableTranscation } from "@/features/dashboard/components/table/transactions-table";
 import SectionGoal from "@/features/dashboard/components/table/section-goal";
 
-export default function page() {
+export default function DashboardPage() {
   const [transaction, setTransaction] = useState<Transactions>([]);
   const [goal, setGoal] = useState<Goals>([]);
   const [total, setTotal] = useState<Total>({

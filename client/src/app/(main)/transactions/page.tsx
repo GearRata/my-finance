@@ -23,7 +23,7 @@ import type {
   Categories,
 } from "@/features/transactions/types/transaction.types";
 
-export default function Page() {
+export default function TransactionPage() {
   const [count, setCount] = useState<Count>({
     total_income: 0,
     total_expense: 0,
@@ -34,6 +34,8 @@ export default function Page() {
   const [type, setType] = useState<string>("all");
   const [page, setPage] = useState<number>(1);
   const [search, setSearch] = useState<string>("");
+  const [refresh, setRefresh] = useState<number>(0);
+
   const [transactions, setTransactions] = useState<fetchTransaction[]>([]);
   const [pagination, setPagination] = useState<Pagination>({
     currentPage: 1,
@@ -69,7 +71,11 @@ export default function Page() {
       }
     };
     fetchData();
-  }, [type, category, page, search]);
+  }, [type, category, page, search, refresh]);
+
+  const handleRefresh = useCallback(() => {
+    setRefresh((prev) => prev + 1);
+  }, []);
 
   const handleSearch = useCallback((keyword: string) => {
     setSearch(keyword);
@@ -89,7 +95,11 @@ export default function Page() {
   return (
     <div>
       <div className="flex flex-1 flex-col gap-4 p-4 ">
-        <SectionHeader categoryList={categoryList} accountList={account} />
+        <SectionHeader
+          categoryList={categoryList}
+          accountList={account}
+          onRefresh={handleRefresh}
+        />
         <SectionCards data={total} count={count} loading={isLoading} />
         <SectionCategories
           type={type}
@@ -100,7 +110,11 @@ export default function Page() {
           categoryList={categoryList}
         />
         <DataTable
-          columns={getColumns({ categoryList, account })}
+          columns={getColumns({
+            categoryList,
+            account,
+            onRefresh: handleRefresh,
+          })}
           data={transactions}
           loading={isLoading}
         />

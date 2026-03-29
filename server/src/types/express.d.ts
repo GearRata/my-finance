@@ -11,6 +11,7 @@ declare global {
         enabled: boolean;
         created_at?: Date;
       };
+      images?: string[];
     }
   }
 }

@@ -5,6 +5,7 @@ import { sendSuccess, sendFail, sendError } from "../utils/apiResponse.js";
 export const list = async (req: Request, res: Response) => {
   try {
     const { limit } = req.params;
+    const user_id = req.user.id;
 
     const query = `
             SELECT 
@@ -25,13 +26,14 @@ export const list = async (req: Request, res: Response) => {
                     'updated_at', c.updated_at         
                 ) AS categories
             FROM transactions t
+            WHERE user_id = $1 AND deleted_at IS NULL
             LEFT JOIN accounts a ON t.account_id = a.id
             LEFT JOIN categories c ON t.category_id = c.id
             ORDER BY t.created_at DESC
-            LIMIT $1
+            LIMIT $2
         `;
 
-    const { rows } = await client.query(query, [limit]);
+    const { rows } = await client.query(query, [user_id, limit]);
     return sendSuccess(res, rows, `${limit} Recent Transactions`);
   } catch (error) {
     console.log(error);
@@ -49,7 +51,7 @@ export const pagination = async (req: Request, res: Response) => {
     const limit = parseInt(req.query.limit as string) || 10;
     const offset = (page - 1) * limit;
 
-    const conditions: string[] = ["t.user_id = $1"];
+    const conditions: string[] = ["deleted_at IS NULL", "t.user_id = $1"];
     const params: (number | string)[] = [user_id];
 
     if (type !== "all") {
@@ -132,7 +134,8 @@ export const count = async (req: Request, res: Response) => {
       SELECT COUNT(*) as number
       FROM transactions t
       WHERE transaction_date >= date_trunc('month', current_date) AND t.user_id = $1
-      AND transaction_date <  date_trunc('month', current_date) + interval '1 month'
+      AND transaction_date <  date_trunc('month', current_date) + interval '1 month' 
+      AND deleted_at IS NULL
     `;
     const { rows } = await client.query(query, [user_id]);
     const data = rows[0];
@@ -413,15 +416,17 @@ export const update = async (req: Request, res: Response) => {
 export const remove = async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
+    const user_id = req.user.id;
+
     const query = `
-        DELETE FROM
-           transactions
-         WHERE
-            id = $1
-          RETURNING *
+      UPDATE
+        transactions
+      SET deleted_at = NOW()
+      WHERE id = $1 AND user_id = $2
+      RETURNING id
         `;
 
-    const { rows } = await client.query(query, [id]);
+    const { rows } = await client.query(query, [id, user_id]);
     const data = rows[0];
 
     if (!data) {

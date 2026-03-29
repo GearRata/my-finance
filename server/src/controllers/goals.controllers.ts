@@ -1,6 +1,7 @@
-import type { Request, Response } from "express";
+import type { NextFunction, Request, Response } from "express";
 import { client } from "../config/db.js";
 import { sendSuccess, sendFail, sendError } from "../utils/apiResponse.js";
+import cloudinary from "../utils/cloudinary.js";
 
 export const list = async (req: Request, res: Response) => {
   try {
@@ -30,6 +31,26 @@ export const list = async (req: Request, res: Response) => {
         `;
     const { rows } = await client.query(query, [count]);
     return sendSuccess(res, rows, "List Goals");
+  } catch (error) {
+    console.log(error);
+    return sendError(res);
+  }
+};
+
+export const total = async (req: Request, res: Response) => {
+  try {
+    const user_id = req.user.id;
+
+    const query = `
+      SELECT 
+        COUNT(*) AS total_goals,
+        COALESCE(SUM(target_amount), 0) AS total_target,
+        COALESCE(SUM(current_amount), 0) AS total_saved
+      FROM goals g
+      WHERE user_id = $1;
+    `;
+    const { rows } = await client.query(query, [user_id]);
+    return sendSuccess(res, rows, "Overview");
   } catch (error) {
     console.log(error);
     return sendError(res);
@@ -80,66 +101,73 @@ export const create = async (req: Request, res: Response) => {
     const { name, target_amount, current_amount, category_id, images } =
       req.body;
 
-    if (!name || !target_amount || !user_id) {
-      return sendFail(res, "Name and target amount are required", "VALIDATION_ERROR", null, 400);
-    }
+    // if (!name || !target_amount || !user_id) {
+    //   return sendFail(
+    //     res,
+    //     "Name and target amount are required",
+    //     "VALIDATION_ERROR",
+    //     null,
+    //     400,
+    //   );
+    // }
 
-    const currentAmount = current_amount || 0;
+    // const currentAmount = current_amount || 0;
 
-    const query = `
-            INSERT INTO 
-                goals (
-                    name, 
-                    target_amount, 
-                    current_amount, 
-                    user_id, 
-                    category_id, 
-                    created_at
-                ) 
-            VALUES ($1, $2, $3, $4, $5, NOW()) RETURNING *
-            `;
+    // const query = `
+    //         INSERT INTO
+    //             goals (
+    //                 name,
+    //                 target_amount,
+    //                 current_amount,
+    //                 user_id,
+    //                 category_id,
+    //                 created_at
+    //             )
+    //         VALUES ($1, $2, $3, $4, $5, NOW()) RETURNING *
+    //         `;
 
-    const { rows } = await client.query(query, [
-      name,
-      target_amount,
-      currentAmount,
-      user_id,
-      category_id,
-    ]);
+    // const { rows } = await client.query(query, [
+    //   name,
+    //   target_amount,
+    //   currentAmount,
+    //   user_id,
+    //   category_id,
+    // ]);
 
-    const newGoal = rows[0];
+    // const newGoal = rows[0];
 
-    if (images && Array.isArray(images) && images.length > 0) {
-      const imagePromises = images.map((item) => {
-        return client.query(
-          `
-                    INSERT INTO 
-                        images (
-                            goal_id, 
-                            user_id, 
-                            asset_id, 
-                            public_id, 
-                            url, 
-                            secure_url, 
-                            created_at
-                        ) 
-                    VALUES ($1, $2, $3, $4, $5, $6, NOW())
-                    `,
-          [
-            newGoal.id,
-            user_id,
-            item.asset_id,
-            item.public_id,
-            item.url,
-            item.secure_url,
-          ],
-        );
-      });
+    // if (images && Array.isArray(images) && images.length > 0) {
+    //   const imagePromises = images.map((item) => {
+    //     return client.query(
+    //       `
+    //                 INSERT INTO
+    //                     images (
+    //                         goal_id,
+    //                         user_id,
+    //                         asset_id,
+    //                         public_id,
+    //                         url,
+    //                         secure_url,
+    //                         created_at
+    //                     )
+    //                 VALUES ($1, $2, $3, $4, $5, $6, NOW())
+    //                 `,
+    //       [
+    //         newGoal.id,
+    //         user_id,
+    //         item.asset_id,
+    //         item.public_id,
+    //         item.url,
+    //         item.secure_url,
+    //       ],
+    //     );
+    //   });
 
-      await Promise.all(imagePromises);
-    }
+    //   await Promise.all(imagePromises);
+    // }
 
-    return sendSuccess(res, newGoal, "Goal created", 201);
+    // return sendSuccess(res, newGoal, "Goal created", 201);
+    res.send(req.file);
   } catch (error) {
     console.log(error);
     return sendError(res);
@@ -163,7 +191,13 @@ export const update = async (req: Request, res: Response) => {
     }
 
     if (!name || !target_amount || !user_id || !current_amount) {
-      return sendFail(res, "All fields are required", "VALIDATION_ERROR", null, 400);
+      return sendFail(
+        res,
+        "All fields are required",
+        "VALIDATION_ERROR",
+        null,
+        400,
+      );
     }
 
     // clear images
@@ -247,14 +281,21 @@ export const remove = async (req: Request, res: Response) => {
       return sendFail(res, "Id is required", "VALIDATION_ERROR", null, 400);
     }
 
-    const { rows } = await client.query("DELETE FROM goals WHERE id = $1 RETURNING *", [
-      id,
-    ]);
+    const { rows } = await client.query(
+      "DELETE FROM goals WHERE id = $1 RETURNING *",
+      [id],
+    );
     const data = rows[0];
 
     // if there is no data, it will return undefined.
     if (!data) {
-      return sendFail(res, "The Id to delete was not found", "NOT_FOUND", null, 404);
+      return sendFail(
+        res,
+        "The Id to delete was not found",
+        "NOT_FOUND",
+        null,
+        404,
+      );
     }
 
     return sendSuccess(res, null, "Deleted");
@@ -262,4 +303,30 @@ export const remove = async (req: Request, res: Response) => {
     console.log(error);
     return sendError(res);
   }
+};
+
+export const uploadImages = async (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) => {
+  try {
+    const images = req.files as Express.Multer.File[];
+    console.log("req.files => ", req.files);
+    console.log("images => ", images);
+    const imageUrls = [];
+
+    for (const image of images) {
+      const result = await cloudinary.uploader.upload(image.path, {
+        resource_type: "auto",
+      });
+
+      imageUrls.push(result.secure_url);
+
+      req.images = imageUrls;
+      console.log("req.images =>", req.images);
+
+      next();
+    }
+  } catch (error) {}
 };

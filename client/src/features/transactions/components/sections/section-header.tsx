@@ -1,6 +1,6 @@
 "use client";
 
-import { ReactElement, useState } from "react";
+import { useState } from "react";
 import {
   Dialog,
   DialogClose,
@@ -38,6 +38,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { CreateTransaction } from "../../services/transaction.services";
+import { toast } from "sonner";
 
 type Categories = {
   id: number;
@@ -53,6 +54,7 @@ type Account = {
 interface SectionTypeProps {
   categoryList: Categories[];
   accountList: Account;
+  onRefresh?: () => void;
 }
 
 function formatDate(date: Date | undefined) {
@@ -72,7 +74,11 @@ function isValidDate(date: Date | undefined) {
   return !isNaN(date.getTime());
 }
 
-export function SectionHeader({ categoryList, accountList }: SectionTypeProps) {
+export function SectionHeader({
+  categoryList,
+  accountList,
+  onRefresh,
+}: SectionTypeProps) {
   const [type, setType] = useState("income");
   const [amount, setAmount] = useState<string>("");
   const [categoryId, setCategory] = useState<string>("");
@@ -96,7 +102,17 @@ export function SectionHeader({ categoryList, accountList }: SectionTypeProps) {
       };
 
       await CreateTransaction(payload);
-    } catch (error) {}
+      toast.success("Data has been recorded successfully", {
+        position: "top-center",
+      });
+
+      if (onRefresh) onRefresh();
+    } catch (error) {
+      toast.error("Something went wrong. Please try again.", {
+        position: "top-center",
+      });
+      console.log(error);
+    }
   };
 
   const filteredCategories = categoryList.filter((cat) => cat.type === type);

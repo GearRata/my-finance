@@ -114,7 +114,7 @@ export function DataTable<TData, TValue>({
               </TableRow>
             ))
           ) : (
-            <TableRow className="border-1 border-red-500">
+            <TableRow>
               <TableCell
                 colSpan={columns.length}
                 className="h-112 text-center "
