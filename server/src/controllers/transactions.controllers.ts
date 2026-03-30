@@ -26,9 +26,9 @@ export const list = async (req: Request, res: Response) => {
                     'updated_at', c.updated_at         
                 ) AS categories
             FROM transactions t
-            WHERE user_id = $1 AND deleted_at IS NULL
             LEFT JOIN accounts a ON t.account_id = a.id
             LEFT JOIN categories c ON t.category_id = c.id
+            WHERE t.user_id = $1 AND deleted_at IS NULL
             ORDER BY t.created_at DESC
             LIMIT $2
         `;

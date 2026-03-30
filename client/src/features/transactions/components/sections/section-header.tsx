@@ -210,7 +210,7 @@ export function SectionHeader({
                     onChange={(e) => setNote(e.target.value)}
                   />
                 </Field>
-                <Field className="">
+                <Field>
                   <FieldLabel htmlFor="date-required">Date</FieldLabel>
                   <InputGroup>
                     <InputGroupInput

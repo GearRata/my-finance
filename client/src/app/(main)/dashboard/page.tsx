@@ -13,11 +13,11 @@ import type {
   Total,
   Analytics,
 } from "@/features/dashboard/types/dashboard.types";
-import { SectionCards } from "@/features/dashboard/components/cards/section-cards";
+import { SectionCards } from "@/features/dashboard/components/sections/section-cards";
 import StackedAreaChart from "@/features/dashboard/components/rechart/stacked-area-chart";
 import ShapePieChart from "@/features/dashboard/components/rechart/pie-chart";
 import { TableTranscation } from "@/features/dashboard/components/table/transactions-table";
-import SectionGoal from "@/features/dashboard/components/table/section-goal";
+import SectionGoal from "@/features/dashboard/components/sections/section-goal";
 
 export default function DashboardPage() {
   const [transaction, setTransaction] = useState<Transactions>([]);
@@ -45,7 +45,7 @@ export default function DashboardPage() {
         setTotal(total.data);
         setAnalytics(analytics.data);
       } catch (error) {
-        console.error("❌ ดึงข้อมูลพลาด:", error);
+        console.error("ดึงข้อมูลพลาด:", error);
       } finally {
         setIsLoading(false);
       }

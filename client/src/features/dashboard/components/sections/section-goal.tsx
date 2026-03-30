@@ -49,7 +49,11 @@ export default function SectionGoal({ data, loading }: GoalProps) {
                   <span>{items.name}</span>
                   <span className="ml-auto">{Math.round(progress)}%</span>
                 </FieldLabel>
-                <Progress value={progress} id="progress-bar" />
+                <Progress
+                  value={progress}
+                  id="progress-bar"
+                  trackClassName="h-3"
+                />
                 <FieldLabel
                   htmlFor="lable-bottom"
                   className="text-xs text-muted-foreground"

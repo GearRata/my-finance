@@ -10,13 +10,6 @@ export const list = async (req: Request, res: Response) => {
     const query = `
             SELECT
                 goals.*,
-                jsonb_build_object(
-                    'id', c.id,
-                    'name', c.name,
-                    'type', c.type,
-                    'created_at', c.created_at,
-                    'updated_at', c.updated_at
-                ) AS categories,
                 (
                     -- COALESCE ถ้ามีข้อมูลจะใช้ค่านั้น แต่ถ้าหากข้อมูลนั้นเป็น NULL จะไปใช้ข้อมูลถัดไป
                     -- jsonb_agg รวบรวมค่าทั้งหมดรวมถึง null ลงใน JSON array
@@ -24,8 +17,7 @@ export const list = async (req: Request, res: Response) => {
                     FROM images i 
                     WHERE i.goal_id = goals.id
                 ) AS images
-            FROM goals
-            LEFT JOIN categories c ON goals.category_id = c.id
+            FROM goals  
             ORDER BY goals.created_at DESC
             LIMIT $1
         `;
@@ -43,14 +35,21 @@ export const total = async (req: Request, res: Response) => {
 
     const query = `
       SELECT 
-        COUNT(*) AS total_goals,
         COALESCE(SUM(target_amount), 0) AS total_target,
         COALESCE(SUM(current_amount), 0) AS total_saved
       FROM goals g
       WHERE user_id = $1;
     `;
     const { rows } = await client.query(query, [user_id]);
-    return sendSuccess(res, rows, "Overview");
+
+    const changType = rows.map((row) => {
+      return {
+        total_target: Number(row.total_target),
+        total_saved: Number(row.total_saved),
+      };
+    });
+    const data = changType[0];
+    return sendSuccess(res, data, "Total");
   } catch (error) {
     console.log(error);
     return sendError(res);
@@ -68,13 +67,6 @@ export const read = async (req: Request, res: Response) => {
     const query = `
             SELECT
                 goals.*,
-                jsonb_build_object(
-                    'id', c.id,
-                    'name', c.name,
-                    'type', c.type,
-                    'created_at', c.created_at,
-                    'updated_at', c.updated_at
-                ) AS categories,
                 (
                     -- COALESCE ถ้ามีข้อมูลจะใช้ค่านั้น แต่ถ้าหากข้อมูลนั้นเป็น NULL จะไปใช้ข้อมูลถัดไป
                     -- jsonb_agg รวบรวมค่าทั้งหมดรวมถึง null ลงใน JSON array
@@ -83,7 +75,6 @@ export const read = async (req: Request, res: Response) => {
                     WHERE i.goal_id = goals.id
                 ) AS images
             FROM goals
-            LEFT JOIN categories c ON goals.category_id = c.id
             WHERE
                 goals.id = $1
         `;
@@ -312,7 +303,7 @@ export const uploadImages = async (
 ) => {
   try {
     const images = req.files as Express.Multer.File[];
-    console.log("req.files => ", req.files);
+    console.log("Request => ", req.file);
     console.log("images => ", images);
     const imageUrls = [];
 
@@ -320,8 +311,15 @@ export const uploadImages = async (
       const result = await cloudinary.uploader.upload(image.path, {
         resource_type: "auto",
       });
+      console.log("===========================");
+      console.log("Result", result);
 
-      imageUrls.push(result.secure_url);
+      imageUrls.push({
+        asset_id: result.asset_id,
+        public_id: result.public_id,
+        url: result.url,
+        secure_url: result.secure_url,
+      });
 
       req.images = imageUrls;
       console.log("req.images =>", req.images);
@@ -330,3 +328,5 @@ export const uploadImages = async (
     }
   } catch (error) {}
 };
+
+// https://cloudinary.com/documentation/image_upload_api_reference#upload_response

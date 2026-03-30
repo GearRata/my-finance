@@ -93,37 +93,35 @@ export default function TransactionPage() {
   }, []);
 
   return (
-    <div>
-      <div className="flex flex-1 flex-col gap-4 p-4 ">
-        <SectionHeader
-          categoryList={categoryList}
-          accountList={account}
-          onRefresh={handleRefresh}
-        />
-        <SectionCards data={total} count={count} loading={isLoading} />
-        <SectionCategories
-          type={type}
-          onTypeChange={handleTypeChange}
-          category={category}
-          onSearch={handleSearch}
-          onCategoryChange={handleCategoryChange}
-          categoryList={categoryList}
-        />
-        <DataTable
-          columns={getColumns({
-            categoryList,
-            account,
-            onRefresh: handleRefresh,
-          })}
-          data={transactions}
-          loading={isLoading}
-        />
-        <SectionPagination
-          currentPage={pagination.currentPage}
-          totalPages={pagination.totalPages}
-          onPageChange={setPage}
-        />
-      </div>
+    <div className="flex flex-1 flex-col gap-4 p-4 ">
+      <SectionHeader
+        categoryList={categoryList}
+        accountList={account}
+        onRefresh={handleRefresh}
+      />
+      <SectionCards data={total} count={count} loading={isLoading} />
+      <SectionCategories
+        type={type}
+        onTypeChange={handleTypeChange}
+        category={category}
+        onSearch={handleSearch}
+        onCategoryChange={handleCategoryChange}
+        categoryList={categoryList}
+      />
+      <DataTable
+        columns={getColumns({
+          categoryList,
+          account,
+          onRefresh: handleRefresh,
+        })}
+        data={transactions}
+        loading={isLoading}
+      />
+      <SectionPagination
+        currentPage={pagination.currentPage}
+        totalPages={pagination.totalPages}
+        onPageChange={setPage}
+      />
     </div>
   );
 }
