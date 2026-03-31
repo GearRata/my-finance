@@ -4,24 +4,36 @@ import { useState, useEffect } from "react";
 
 import { SectionCards } from "@/features/goals/components/sections/section-cards";
 import { SectionMain } from "@/features/goals/components/sections/section-main";
-import { fetchTotal } from "@/features/goals/services/goal.services";
+import {
+  fetchTotal,
+  fetchGoals,
+} from "@/features/goals/services/goal.services";
 
-interface Goal {
+interface Total {
   total_saved: number;
   total_target: number;
 }
 
+interface Goals {
+  id: number;
+  name: string;
+  target_amount: number;
+  current_amount: number;
+}
+
 export default function GoalPage() {
-  const [goal, setGoal] = useState<Goal>({
+  const [total, setTotal] = useState<Total>({
     total_saved: 0,
     total_target: 0,
   });
+  const [goal, setGoal] = useState<Goals[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(true);
 
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const [goals] = await Promise.all([fetchTotal()]);
+        const [total, goals] = await Promise.all([fetchTotal(), fetchGoals()]);
+        setTotal(total.data);
         setGoal(goals.data);
       } catch (error) {
         console.error("ดึงข้อมูลพลาด:", error);
@@ -32,12 +44,11 @@ export default function GoalPage() {
     fetchData();
   }, []);
 
-  console.log(goal);
   return (
     <div className="flex flex-1 flex-col gap-4 p-4 ">
       <h1>Goals</h1>
-      <SectionCards data={goal} />
-      <SectionMain />
+      <SectionCards data={total} />
+      <SectionMain goal={goal} />
     </div>
   );
 }

@@ -9,3 +9,13 @@ export const fetchTotal = async () => {
     throw error;
   }
 };
+
+export const fetchGoals = async () => {
+  try {
+    const response = await apiClient.get("/goals/all");
+    return response.data;
+  } catch (error) {
+    console.log(error);
+    throw error;
+  }
+};

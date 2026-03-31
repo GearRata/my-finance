@@ -29,6 +29,24 @@ export const list = async (req: Request, res: Response) => {
   }
 };
 
+export const listAll = async (req: Request, res: Response) => {
+  try {
+    const user_id = req.user.id;
+    const query = `
+      SELECT 
+        *
+      FROM goals 
+      WHERE user_id = $1
+      ORDER BY goals.created_at 
+    `;
+    const { rows } = await client.query(query, [user_id]);
+    return sendSuccess(res, rows, "List Goals");
+  } catch (error) {
+    console.log(error);
+    return sendError(res);
+  }
+};
+
 export const total = async (req: Request, res: Response) => {
   try {
     const user_id = req.user.id;
