@@ -34,10 +34,15 @@ export const listAll = async (req: Request, res: Response) => {
     const user_id = req.user.id;
     const query = `
       SELECT 
-        *
+        goals.*,
+        (
+            SELECT COALESCE(jsonb_agg(i), '[]'::jsonb)
+            FROM images i 
+            WHERE i.goal_id = goals.id
+        ) AS images
       FROM goals 
       WHERE user_id = $1
-      ORDER BY goals.created_at 
+      ORDER BY goals.created_at DESC
     `;
     const { rows } = await client.query(query, [user_id]);
     return sendSuccess(res, rows, "List Goals");
@@ -107,75 +112,75 @@ export const read = async (req: Request, res: Response) => {
 export const create = async (req: Request, res: Response) => {
   try {
     const user_id = req.user.id;
-    const { name, target_amount, current_amount, category_id, images } =
-      req.body;
+    const { name, target_amount, current_amount, due_date, images } = req.body;
+    console.log(images);
 
-    // if (!name || !target_amount || !user_id) {
-    //   return sendFail(
-    //     res,
-    //     "Name and target amount are required",
-    //     "VALIDATION_ERROR",
-    //     null,
-    //     400,
-    //   );
-    // }
+    if (!name || !target_amount || !user_id) {
+      return sendFail(
+        res,
+        "Name and target amount are required",
+        "VALIDATION_ERROR",
+        null,
+        400,
+      );
+    }
 
-    // const currentAmount = current_amount || 0;
+    const currentAmount = current_amount || 0;
 
-    // const query = `
-    //         INSERT INTO
-    //             goals (
-    //                 name,
-    //                 target_amount,
-    //                 current_amount,
-    //                 user_id,
-    //                 category_id,
-    //                 created_at
-    //             )
-    //         VALUES ($1, $2, $3, $4, $5, NOW()) RETURNING *
-    //         `;
+    const query = `
+            INSERT INTO
+                goals (
+                    name,
+                    target_amount,
+                    current_amount,
+                    user_id,
+                    due_date,
+                    created_at
+                )
+            VALUES ($1, $2, $3, $4, $5, NOW()) RETURNING *
+            `;
 
-    // const { rows } = await client.query(query, [
-    //   name,
-    //   target_amount,
-    //   currentAmount,
-    //   user_id,
-    //   category_id,
-    // ]);
+    const { rows } = await client.query(query, [
+      name,
+      target_amount,
+      currentAmount,
+      user_id,
+      due_date,
+    ]);
 
-    // const newGoal = rows[0];
+    const newGoal = rows[0];
 
-    // if (images && Array.isArray(images) && images.length > 0) {
-    //   const imagePromises = images.map((item) => {
-    //     return client.query(
-    //       `
-    //                 INSERT INTO
-    //                     images (
-    //                         goal_id,
-    //                         user_id,
-    //                         asset_id,
-    //                         public_id,
-    //                         url,
-    //                         secure_url,
-    //                         created_at
-    //                     )
-    //                 VALUES ($1, $2, $3, $4, $5, $6, NOW())
-    //                 `,
-    //       [
-    //         newGoal.id,
-    //         user_id,
-    //         item.asset_id,
-    //         item.public_id,
-    //         item.url,
-    //         item.secure_url,
-    //       ],
-    //     );
-    //   });
+    if (images && Array.isArray(images) && images.length > 0) {
+      const imagePromises = images.map((item) => {
+        return client.query(
+          `
+                    INSERT INTO
+                        images (
+                            goal_id,
+                            user_id,
+                            asset_id,
+                            public_id,
+                            url,
+                            secure_url,
+                            created_at
+                        )
+                    VALUES ($1, $2, $3, $4, $5, $6, NOW())
+                    `,
+          [
+            newGoal.id,
+            user_id,
+            item.asset_id,
+            item.public_id,
+            item.url,
+            item.secure_url,
+          ],
+        );
+      });
 
-    //   await Promise.all(imagePromises);
-    // }
+      await Promise.all(imagePromises);
+    }
 
-    // return sendSuccess(res, newGoal, "Goal created", 201);
+    return sendSuccess(res, newGoal, "Goal created", 201);
     res.send(req.file);
   } catch (error) {
     console.log(error);
@@ -186,14 +191,8 @@ export const create = async (req: Request, res: Response) => {
 export const update = async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
-    const {
-      name,
-      target_amount,
-      current_amount,
-      user_id,
-      category_id,
-      images,
-    } = req.body;
+    const { name, target_amount, current_amount, user_id, due_date, images } =
+      req.body;
 
     if (!id) {
       return sendFail(res, "Id is required", "VALIDATION_ERROR", null, 400);
@@ -229,7 +228,7 @@ export const update = async (req: Request, res: Response) => {
                 current_amount = $3,
                 user_id = $4,
                 updated_at = NOW(),
-                category_id = $5
+                due_date = $5
             WHERE 
                 id = $6
             RETURNING *
@@ -240,7 +239,7 @@ export const update = async (req: Request, res: Response) => {
       target_amount,
       current_amount,
       user_id,
-      category_id,
+      due_date,
       id,
     ]);
 
@@ -320,17 +319,13 @@ export const uploadImages = async (
   next: NextFunction,
 ) => {
   try {
-    const images = req.files as Express.Multer.File[];
-    console.log("Request => ", req.file);
-    console.log("images => ", images);
+    const images = (req.files as Express.Multer.File[]) || [];
     const imageUrls = [];
 
     for (const image of images) {
       const result = await cloudinary.uploader.upload(image.path, {
         resource_type: "auto",
       });
-      console.log("===========================");
-      console.log("Result", result);
 
       imageUrls.push({
         asset_id: result.asset_id,
@@ -338,13 +333,17 @@ export const uploadImages = async (
         url: result.url,
         secure_url: result.secure_url,
       });
-
-      req.images = imageUrls;
-      console.log("req.images =>", req.images);
-
-      next();
     }
-  } catch (error) {}
+
+    // ยัด imageUrls กลับเข้าไปใน req.body.images จะได้ตรงกับที่ดึงออกมาใน create และ update
+    req.body.images = imageUrls;
+
+    // เรียก next() แค่ครั้งเดียวหลังจากอัปโหลดครบแล้ว (หรือไม่มีรูปก็ผ่านไปได้)
+    next();
+  } catch (error) {
+    console.log(error);
+    next(error);
+  }
 };
 
 // https://cloudinary.com/documentation/image_upload_api_reference#upload_response

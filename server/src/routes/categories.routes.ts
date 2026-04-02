@@ -9,7 +9,6 @@ import {
 
 const router = express.Router();
 
-// @ENDPOINT http://localhost:5000/api/categories
 router.get("/categories", authCheck, list);
 router.post("/categories", authCheck, create);
 router.put("/categories/:id", authCheck, update);

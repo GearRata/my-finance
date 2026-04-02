@@ -19,3 +19,15 @@ export const fetchGoals = async () => {
     throw error;
   }
 };
+
+export const createGoal = async (data: any) => {
+  try {
+    const response = await apiClient.post("/goals", data, {
+      headers: { "Content-Type": "multipart/form-data" },
+    });
+    return response.data;
+  } catch (error) {
+    console.log(error);
+    throw error;
+  }
+};

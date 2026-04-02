@@ -14,7 +14,7 @@ import userRoutes from "./routes/user.routes.js";
 import { connectDB } from "./config/db.js";
 
 const app = express();
-const port = 5000;
+const port = process.env.PORT;
 
 //Middleware
 app.use(morgan("dev"));

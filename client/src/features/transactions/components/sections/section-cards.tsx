@@ -16,10 +16,10 @@ import {
 import { Skeleton } from "@/components/ui/skeleton";
 import { formatCurrency } from "@/lib/utils";
 
-export function SectionCards({ data, count, loading }: any) {
+export function SectionCards({ data, loading }: any) {
   const totalIncome = data.total_income || 0;
   const totalExpense = data.total_expense || 0;
-  const totalNumber = count.number || 0;
+  const totalNumber = data.number_of_transaction || 0;
   return (
     <div className="grid grid-cols-1 gap-4 lg:grid-cols-3 ">
       <Card className="@container/card">

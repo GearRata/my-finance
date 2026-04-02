@@ -33,9 +33,9 @@ export const fetchGoals = async (count: number) => {
   }
 };
 
-export const fetchTotalCashFlow = async () => {
+export const fetchSummaryCashFlow = async () => {
   try {
-    const response = await apiClient.get("/transactions/total");
+    const response = await apiClient.get("/transactions/summary");
     return response.data;
   } catch (error) {
     console.error("Error fetching dashboard summary:", error);

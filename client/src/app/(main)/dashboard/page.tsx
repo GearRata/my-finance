@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import {
   fetchTransactions,
   fetchGoals,
-  fetchTotalCashFlow,
+  fetchSummaryCashFlow,
   fetchDashboardAnalytics,
 } from "@/features/dashboard/services/dashboard.services";
 import type {
@@ -35,7 +35,7 @@ export default function DashboardPage() {
       setIsLoading(true);
       try {
         const [total, analytics, transactions, goals] = await Promise.all([
-          fetchTotalCashFlow(),
+          fetchSummaryCashFlow(),
           fetchDashboardAnalytics(),
           fetchTransactions(5),
           fetchGoals(4),

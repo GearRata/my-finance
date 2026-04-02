@@ -1,8 +1,7 @@
 import type { Request, Response } from "express";
-import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
-import { client } from "../config/db.js";
 import { sendSuccess, sendError, sendFail } from "../utils/apiResponse.js";
+import * as AuthService from "../services/auth.service.js";
 
 export const register = async (req: Request, res: Response) => {
   try {
@@ -37,43 +36,24 @@ export const register = async (req: Request, res: Response) => {
       );
     }
 
-    // Check if email already exists (ตรวจสอบว่าอีเมลนี้มีอยู่แล้วหรือไม่)
-    const query = `
-      SELECT 
-        * 
-      FROM 
-        users 
-      WHERE 
-        email = $1
-    `;
-    const { rows } = await client.query(query, [email]);
-    const user = rows[0];
-
-    if (user) {
-      return sendFail(res, "Email already exists", "EMAIL_EXISTS", null, 400);
+    try {
+      await AuthService.register(email, password);
+      return sendSuccess(res, null, "Register Success", 201);
+    } catch (error: unknown) {
+      // ใช้ if (error instanceof Error) เพื่อปลดล็อก type 'unknown'
+      if (error instanceof Error) {
+        if (error.message === "Email already exists") {
+          return sendFail(
+            res,
+            "Email already exists",
+            "EMAIL_EXISTS",
+            null,
+            400,
+          );
+        }
+      }
+      throw error; // โยน error อื่นๆ เข้า catch รวบยอดด้านล่าง
     }
-
-    // Hash password (นำรหัสมาเข้ารหัสแบบทางเดียวและ salt เพิ่มเข้าไป)
-    const hashPassword = await bcrypt.hash(password, 10);
-
-    // Create New User
-    await client.query(
-      `
-			INSERT INTO 
-				users (
-					email, 
-					password, 
-					created_at
-				) 
-				VALUES (
-					$1, 
-					$2, 
-					NOW()
-				)
-			`,
-      [email, hashPassword],
-    );
-    return sendSuccess(res, null, "Register Success", 201);
   } catch (error) {
     console.log(error);
     return sendError(res);
@@ -108,62 +88,55 @@ export const login = async (req: Request, res: Response) => {
       );
     }
 
-    // Check if user exists
-    const { rows } = await client.query(
-      "SELECT * FROM users WHERE email = $1",
-      [email],
-    );
-    const user = rows[0];
+    try {
+      const user = await AuthService.login(email, password);
 
-    // เช็ค user ว่าเจอไหม
-    if (!user) {
-      return sendFail(res, "User not found", "USER_NOT_FOUND", null, 404);
-    }
+      // Create Payload
+      const payload = {
+        id: user.id,
+        email: user.email,
+      };
 
-    // เช็ค user ว่าได้ status เป็น enabled ยัง
-    if (!user.enabled) {
-      return sendFail(res, "User not enabled", "USER_DISABLED", null, 400);
-    }
+      // Create JWT token
+      jwt.sign(
+        payload,
+        process.env.JWT_SECRET as string,
+        { expiresIn: "5h" },
+        (err, token) => {
+          if (err || !token) {
+            return sendError(res);
+          }
 
-    // Check if password is correct
-    const isMatch = await bcrypt.compare(password, user.password);
-    if (!isMatch) {
-      return sendFail(
-        res,
-        "Password is not correct",
-        "INVALID_PASSWORD",
-        null,
-        400,
+          // Response ให้เก็บ cookie ไว้บน Browser
+          res.cookie("token", token, {
+            httpOnly: true,
+            secure: false,
+            maxAge: 5 * 60 * 60 * 1000, // 5 hours in milliseconds
+            sameSite: "lax",
+          });
+          return sendSuccess(res, payload, "Login Sucess");
+        },
       );
-    }
-
-    // Create Payload
-    const payload = {
-      id: user.id,
-      email: user.email,
-    };
-
-    // Create JWT token
-    jwt.sign(
-      payload,
-      process.env.JWT_SECRET as string,
-      { expiresIn: "5h" },
-      (err, token) => {
-        if (err || !token) {
-          return sendError(res);
+    } catch (error: unknown) {
+      if (error instanceof Error) {
+        if (error.message === "USER_NOT_FOUND") {
+          return sendFail(res, "User not found", "USER_NOT_FOUND", null, 404);
         }
-
-        // Response ให้เก็บ cookie ไว้บน Browser
-        res.cookie("token", token, {
-          httpOnly: true,
-          secure: false,
-          maxAge: 5 * 60 * 60 * 1000, // 5 hours in milliseconds
-          sameSite: "lax",
-        });
-        return sendSuccess(res, payload, "Login Sucess");
-        // res.json({ message: "Login Success", payload });
-      },
-    );
+        if (error.message === "USER_DISABLED") {
+          return sendFail(res, "User not enabled", "USER_DISABLED", null, 400);
+        }
+        if (error.message === "INVALID_PASSWORD") {
+          return sendFail(
+            res,
+            "Password is not correct",
+            "INVALID_PASSWORD",
+            null,
+            400,
+          );
+        }
+      }
+      throw error;
+    }
   } catch (error) {
     return sendError(res);
   }

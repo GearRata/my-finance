@@ -11,12 +11,12 @@ declare global {
         enabled: boolean;
         created_at?: Date;
       };
-      images?: string[{
+      images?: Array<{
         asset_id: string;
         public_id: string;
         url: string;
         secure_url: string;
-      }];
+      }>;
     }
   }
 }

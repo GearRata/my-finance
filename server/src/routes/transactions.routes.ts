@@ -3,20 +3,17 @@ import { authCheck } from "../middleware/authCheck.js";
 import {
   list,
   pagination,
-  count,
   listby,
   create,
   searchFilter,
   update,
   remove,
-  total,
+  summary,
   analytics,
 } from "../controllers/transactions.controllers.js";
 
 const router = express.Router();
-
-router.get("/transactions/count", authCheck, count);
-router.get("/transactions/total", authCheck, total);
+router.get("/transactions/summary", authCheck, summary);
 router.get("/transactions/analytics", authCheck, analytics);
 router.get("/transactions/", authCheck, pagination);
 router.get("/transactions/:limit", authCheck, list);

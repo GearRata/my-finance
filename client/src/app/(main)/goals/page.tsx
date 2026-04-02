@@ -27,20 +27,22 @@ export default function GoalPage() {
     total_target: 0,
   });
   const [goal, setGoal] = useState<Goals[]>([]);
+  const [refresh, setRefresh] = useState();
   const [isLoading, setIsLoading] = useState<boolean>(true);
 
+  const fetchData = async () => {
+    try {
+      const [total, goals] = await Promise.all([fetchTotal(), fetchGoals()]);
+      setTotal(total.data);
+      setGoal(goals.data);
+    } catch (error) {
+      console.error("ดึงข้อมูลพลาด:", error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const [total, goals] = await Promise.all([fetchTotal(), fetchGoals()]);
-        setTotal(total.data);
-        setGoal(goals.data);
-      } catch (error) {
-        console.error("ดึงข้อมูลพลาด:", error);
-      } finally {
-        setIsLoading(false);
-      }
-    };
     fetchData();
   }, []);
 

@@ -145,8 +145,8 @@ export default function ShapePieChart({
                 data={pieData}
                 cx="50%"
                 cy="50%"
-                innerRadius="65%"
-                outerRadius="85%" // ขยายรัศมีให้ใหญ่ขึ้น
+                innerRadius="50%"
+                outerRadius="70%"
                 dataKey="value"
                 isAnimationActive={isAnimationActive}
               />

@@ -51,12 +51,14 @@ import { Progress } from "@/components/ui/progress";
 import { CircularProgress } from "@/components/progress-09";
 import { formatCurrency } from "@/lib/utils";
 import picture from "../../../../../public/assets/images/NIKE.png";
+import { createGoal } from "../../services/goal.services";
 
 interface TypeGoals {
   id: number;
   name: string;
   target_amount: number;
   current_amount: number;
+  images?: any[];
 }
 
 type GoalsProps = {
@@ -81,7 +83,6 @@ function isValidDate(date: Date | undefined) {
 }
 
 export function SectionMain({ goal }: GoalsProps) {
-  console.log(goal);
   const [name, setName] = useState("");
   const [targetAmount, setTargetAmount] = useState("");
   const [currentAmount, setCurrentAmount] = useState("");
@@ -92,6 +93,27 @@ export function SectionMain({ goal }: GoalsProps) {
   const [value, setValue] = useState(formatDate(date));
 
   const [files, setFiles] = useState<File[]>([]);
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    try {
+      const form = new FormData();
+
+      form.append("name", name);
+      form.append("target_amount", targetAmount);
+      form.append("current_amount", currentAmount || "0");
+      form.append("due_date", date?.toISOString() || "");
+
+      files.forEach((file) => {
+        form.append("images", file);
+      });
+      console.log(files);
+
+      await createGoal(form);
+    } catch (error) {
+      console.error("เจอแล้ว สาเหตุที่หยุดทำงาน:", error);
+    }
+  };
 
   return (
     <section className="grid grid-cols-1 gap-4 lg:grid-cols-3">
@@ -105,13 +127,18 @@ export function SectionMain({ goal }: GoalsProps) {
         return (
           <Card
             key={g.id}
-            className="relative overflow-hidden h-[400px] flex flex-col justify-end border-0 shadow-2xl group"
+            className="relative overflow-hidden h-[600px] flex flex-col justify-end border-0 shadow-2xl group"
           >
             <div className="absolute inset-0 z-0">
               <Image
-                src={picture}
+                src={
+                  g.images && g.images.length > 0
+                    ? g.images[0].secure_url
+                    : picture
+                }
                 alt="background"
                 fill
+                unoptimized // ป้องกัน Next.js ท้วงเรื่อง Domain หากยังไม่ได้ตั้งค่า next.config.ts
                 className="object-cover object-[50%_125%] transition-transform duration-700 group-hover:scale-105"
               />
             </div>
@@ -141,7 +168,7 @@ export function SectionMain({ goal }: GoalsProps) {
                   }
                 />
                 <DialogContent>
-                  <form>
+                  <form onSubmit={(e) => e.preventDefault()}>
                     <DialogHeader>
                       <DialogTitle>Add Fuds</DialogTitle>
                       <DialogDescription>
@@ -229,7 +256,7 @@ export function SectionMain({ goal }: GoalsProps) {
                 }
               />
               <DialogContent>
-                <form>
+                <form onSubmit={handleSubmit}>
                   <DialogHeader>
                     <DialogTitle>Add New Goal</DialogTitle>
                     <DialogDescription>Record your new Goal</DialogDescription>
