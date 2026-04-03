@@ -15,6 +15,7 @@ import {
   Sector,
   PieSectorDataItem,
   Tooltip,
+  Cell,
 } from "recharts";
 import { Skeleton } from "@/components/ui/skeleton";
 
@@ -25,6 +26,7 @@ interface PieTypeProps {
   isAnimationActive?: boolean;
   loading: boolean;
 }
+const COLORS = ["#0088FE", "#00C49F", "#FFBB28", "#FF8042", "#AF19FF"];
 
 const renderActiveShape = (props: PieSectorDataItem) => {
   const RADIAN = Math.PI / 180;
@@ -149,7 +151,14 @@ export default function ShapePieChart({
                 outerRadius="70%"
                 dataKey="value"
                 isAnimationActive={isAnimationActive}
-              />
+              >
+                {pieData.map((entry, index) => (
+                  <Cell
+                    key={`cell-${index}`}
+                    fill={COLORS[index % COLORS.length]}
+                  />
+                ))}
+              </Pie>
               <Tooltip content={() => null} />
             </PieChart>
           </ResponsiveContainer>

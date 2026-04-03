@@ -5,23 +5,25 @@ import cloudinary from "../utils/cloudinary.js";
 
 export const list = async (req: Request, res: Response) => {
   try {
-    const { count } = req.params;
+    const user_id = req.user.id;
+    const { limit } = req.params;
 
     const query = `
             SELECT
-                goals.*,
+                g.*,
                 (
                     -- COALESCE ถ้ามีข้อมูลจะใช้ค่านั้น แต่ถ้าหากข้อมูลนั้นเป็น NULL จะไปใช้ข้อมูลถัดไป
                     -- jsonb_agg รวบรวมค่าทั้งหมดรวมถึง null ลงใน JSON array
                     SELECT COALESCE(jsonb_agg(i), '[]'::jsonb)
                     FROM images i 
-                    WHERE i.goal_id = goals.id
+                    WHERE i.goal_id = g.id
                 ) AS images
-            FROM goals  
-            ORDER BY goals.created_at DESC
-            LIMIT $1
+            FROM goals g
+            WHERE g.user_id = $1
+            ORDER BY g.created_at DESC
+            LIMIT $2
         `;
-    const { rows } = await client.query(query, [count]);
+    const { rows } = await client.query(query, [user_id, limit]);
     return sendSuccess(res, rows, "List Goals");
   } catch (error) {
     console.log(error);

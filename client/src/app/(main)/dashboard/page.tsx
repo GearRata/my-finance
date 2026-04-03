@@ -2,10 +2,10 @@
 
 import { useState, useEffect } from "react";
 import {
-  fetchTransactions,
-  fetchGoals,
-  fetchSummaryCashFlow,
-  fetchDashboardAnalytics,
+  getTransactions,
+  getGoals,
+  getCashFlowSummary,
+  getDashboardAnalytics,
 } from "@/features/dashboard/services/dashboard.services";
 import type {
   Transactions,
@@ -35,10 +35,10 @@ export default function DashboardPage() {
       setIsLoading(true);
       try {
         const [total, analytics, transactions, goals] = await Promise.all([
-          fetchSummaryCashFlow(),
-          fetchDashboardAnalytics(),
-          fetchTransactions(5),
-          fetchGoals(4),
+          getCashFlowSummary(),
+          getDashboardAnalytics(),
+          getTransactions(5),
+          getGoals(4),
         ]);
         setTransaction(transactions.data);
         setGoal(goals.data);

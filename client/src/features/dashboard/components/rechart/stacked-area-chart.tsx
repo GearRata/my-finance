@@ -106,7 +106,15 @@ const AreaChartExample = ({
                 </defs>
                 <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
                 <XAxis dataKey="month" />
-                <YAxis width="auto" />
+                <YAxis
+                  width={60}
+                  tickFormatter={(value) =>
+                    Intl.NumberFormat("en-US", {
+                      notation: "compact",
+                      maximumFractionDigits: 1,
+                    }).format(value)
+                  }
+                />
                 <Tooltip content={CustomTooltip} />
                 <Area
                   type="monotone"

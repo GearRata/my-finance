@@ -70,16 +70,14 @@ export function TableTranscation({ data, loading }: TransactionProps) {
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead className="w-[100px] text-lg">List</TableHead>
-                <TableHead className="text-right text-lg">Amount</TableHead>
+                <TableHead className="w-[100px] text-xl">List</TableHead>
+                <TableHead className="text-right text-xl">Amount</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {data.map((items) => (
                 <TableRow key={items.id}>
-                  <TableCell className="font-medium text-lg">
-                    {items.note}
-                  </TableCell>
+                  <TableCell className=" text-lg py-5">{items.note}</TableCell>
                   <TableCell className="text-right text-lg">
                     {items.amount}
                   </TableCell>

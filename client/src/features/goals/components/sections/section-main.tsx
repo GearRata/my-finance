@@ -50,7 +50,7 @@ import { Input } from "@/components/ui/input";
 import { Progress } from "@/components/ui/progress";
 import { CircularProgress } from "@/components/progress-09";
 import { formatCurrency } from "@/lib/utils";
-import picture from "../../../../../public/assets/images/NIKE.png";
+import noImage from "../../../../../public/assets/images/No_Image.jpg";
 import { createGoal } from "../../services/goal.services";
 
 interface TypeGoals {
@@ -134,11 +134,11 @@ export function SectionMain({ goal }: GoalsProps) {
                 src={
                   g.images && g.images.length > 0
                     ? g.images[0].secure_url
-                    : picture
+                    : noImage
                 }
                 alt="background"
                 fill
-                unoptimized // ป้องกัน Next.js ท้วงเรื่อง Domain หากยังไม่ได้ตั้งค่า next.config.ts
+                // ป้องกัน Next.js ท้วงเรื่อง Domain หากยังไม่ได้ตั้งค่า next.config.ts
                 className="object-cover object-[50%_125%] transition-transform duration-700 group-hover:scale-105"
               />
             </div>

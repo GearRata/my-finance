@@ -40,12 +40,12 @@ export default function SectionGoal({ data, loading }: GoalProps) {
         <CardDescription>ความคืบหน้าเป้าหมายหลัก</CardDescription>
       </CardHeader>
       <CardContent>
-        <div className="space-y-6">
+        <div className="space-y-2">
           {data.map((items) => {
             const progress = (items.current_amount / items.target_amount) * 100;
             return (
-              <Field key={items.id} className="w-full space-y-2">
-                <FieldLabel htmlFor="label-top">
+              <Field key={items.id} className="w-full space-y-1">
+                <FieldLabel htmlFor="label-top" className="text-lg">
                   <span>{items.name}</span>
                   <span className="ml-auto">{Math.round(progress)}%</span>
                 </FieldLabel>
@@ -56,7 +56,7 @@ export default function SectionGoal({ data, loading }: GoalProps) {
                 />
                 <FieldLabel
                   htmlFor="lable-bottom"
-                  className="text-xs text-muted-foreground"
+                  className="text-md text-muted-foreground"
                 >
                   <span>{formatCurrency(items.current_amount)}</span>
                   <span className="ml-auto">

@@ -16,7 +16,7 @@ const router = express.Router();
 
 router.get("/goals/total", authCheck, total);
 router.get("/goals/all", authCheck, listAll);
-router.get("/goals/:count", authCheck, list);
+router.get("/goals/:limit", authCheck, list);
 router.get("/goals/:id", authCheck, read);
 router.post("/goals", authCheck, upload.array("images"), uploadImages, create);
 router.put("/goals/:id", authCheck, update);
