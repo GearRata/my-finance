@@ -2,7 +2,7 @@ import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import Threads from "@/features/auth/components/Threads";
 
-export default function Home() {
+export default function LandingPage() {
   return (
     <div style={{ width: "100%", height: "100vh", position: "relative" }}>
       <Threads amplitude={3} distance={0} />
@@ -14,13 +14,21 @@ export default function Home() {
           Manage your expenses, set goals, and take control of your financial
           future starting today.
         </p>
-        <div className="mt-4 flex gap-4">
+        <div className="flex gap-4">
           <Link href="/register">
             <Button
               size="lg"
               className="px-10 h-12 text-lg shadow-lg hover:scale-105 transition-transform"
             >
               Get Started
+            </Button>
+          </Link>
+          <Link href="/login">
+            <Button
+              size="lg"
+              className="px-10 h-12 text-lg shadow-lg hover:scale-105 transition-transform"
+            >
+              Sign In
             </Button>
           </Link>
         </div>

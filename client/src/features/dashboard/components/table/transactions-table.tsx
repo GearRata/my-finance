@@ -27,10 +27,8 @@ export function TableTranscation({ data, loading }: TransactionProps) {
   return loading ? (
     <Card>
       <CardHeader className="items-center pb-0">
-        <CardTitle className="text-2xl">Recent List</CardTitle>
-        <CardDescription className="text-xl">
-          5 Recent Transactions
-        </CardDescription>
+        <CardTitle className="text-xl">Recent Transactions</CardTitle>
+        <CardDescription>Latest 5 Transactions</CardDescription>
       </CardHeader>
       <CardContent>
         <div className="h-[400px] w-full min-w-[300px]">
@@ -60,10 +58,8 @@ export function TableTranscation({ data, loading }: TransactionProps) {
   ) : (
     <Card>
       <CardHeader className="items-center pb-0">
-        <CardTitle className="text-2xl">Recent List</CardTitle>
-        <CardDescription className="text-xl">
-          5 Recent Transactions
-        </CardDescription>
+        <CardTitle className="text-xl">Recent Transactions</CardTitle>
+        <CardDescription>Latest 5 Transactions</CardDescription>
       </CardHeader>
       <CardContent>
         <div className="h-[400px] w-full min-w-[300px]">

@@ -20,8 +20,8 @@ export default function SectionGoal({ data, loading }: GoalProps) {
   return loading ? (
     <Card>
       <CardHeader>
-        <CardTitle>เป้าหมายการออม</CardTitle>
-        <CardDescription>ความคืบหน้าเป้าหมายหลัก</CardDescription>
+        <CardTitle className="text-xl">Savings Goal</CardTitle>
+        <CardDescription>Main Goal Progress</CardDescription>
       </CardHeader>
       <CardContent>
         <div className="space-y-6">
@@ -36,8 +36,8 @@ export default function SectionGoal({ data, loading }: GoalProps) {
   ) : (
     <Card>
       <CardHeader>
-        <CardTitle>เป้าหมายการออม</CardTitle>
-        <CardDescription>ความคืบหน้าเป้าหมายหลัก</CardDescription>
+        <CardTitle className="text-xl">Savings Goal</CardTitle>
+        <CardDescription>Main Goal Progress</CardDescription>
       </CardHeader>
       <CardContent>
         <div className="space-y-2">

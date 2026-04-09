@@ -23,18 +23,18 @@ type Categories = {
 interface SectionTypeProps {
   type: string;
   onTypeChange: (type: string) => void;
-  category: string;
+  categoryId: string;
   onSearch: (keyword: string) => void;
-  onCategoryChange: (category: string) => void;
+  onCategoryIdChange: (categoryId: string) => void;
   categoryList: Categories[];
 }
 
 export function SectionCategories({
   type,
   onTypeChange,
-  category,
+  categoryId,
   onSearch,
-  onCategoryChange,
+  onCategoryIdChange,
   categoryList,
 }: SectionTypeProps) {
   const [search, setSearch] = useState("");
@@ -90,14 +90,14 @@ export function SectionCategories({
           </Select>
 
           <Select
-            value={category}
-            onValueChange={(value) => value && onCategoryChange(value)}
+            value={categoryId}
+            onValueChange={(value) => value && onCategoryIdChange(value)}
           >
             <SelectTrigger className="w-full">
               <SelectValue>
-                {category === "all"
+                {categoryId === "all"
                   ? "All Categories"
-                  : categoryList.find((c) => String(c.id) === category)?.name}
+                  : categoryList.find((c) => String(c.id) === categoryId)?.name}
               </SelectValue>
             </SelectTrigger>
             <SelectContent alignItemWithTrigger={false}>

@@ -26,7 +26,13 @@ interface PieTypeProps {
   isAnimationActive?: boolean;
   loading: boolean;
 }
-const COLORS = ["#0088FE", "#00C49F", "#FFBB28", "#FF8042", "#AF19FF"];
+const COLORS = [
+  "var(--chart-1)",
+  "var(--chart-2)",
+  "var(--chart-3)",
+  "var(--chart-4)",
+  "var(--chart-5)",
+];
 
 const renderActiveShape = (props: PieSectorDataItem) => {
   const RADIAN = Math.PI / 180;
@@ -119,8 +125,8 @@ export default function ShapePieChart({
   return loading ? (
     <Card className="flex flex-col">
       <CardHeader className="items-center pb-0">
-        <CardTitle>สัดส่วนรายจ่าย</CardTitle>
-        <CardDescription>แยกตามหมวดหมู่เดือนปัจจุบัน</CardDescription>
+        <CardTitle className="text-xl">Expense Breakdown</CardTitle>
+        <CardDescription>By Category (Current Month)</CardDescription>
       </CardHeader>
       <CardContent className="flex-1 pb-0">
         <div className="h-[400px] w-full min-w-[300px]">
@@ -131,8 +137,8 @@ export default function ShapePieChart({
   ) : (
     <Card className="flex flex-col">
       <CardHeader className="items-center pb-0">
-        <CardTitle>สัดส่วนรายจ่าย</CardTitle>
-        <CardDescription>แยกตามหมวดหมู่เดือนปัจจุบัน</CardDescription>
+        <CardTitle className="text-xl">Expense Breakdown</CardTitle>
+        <CardDescription>By Category (Current Month)</CardDescription>
       </CardHeader>
       <CardContent className="flex-1 pb-0">
         <div className="h-[400px] w-full min-w-[300px]">

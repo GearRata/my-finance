@@ -10,7 +10,13 @@ import {
   YAxis,
   ResponsiveContainer,
 } from "recharts";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import type { TrendType } from "../../types/dashboard.types";
 
@@ -53,7 +59,8 @@ const AreaChartExample = ({
   loading ? (
     <Card>
       <CardHeader>
-        <CardTitle>แนวโน้มรายรับรายจ่าย</CardTitle>
+        <CardTitle className="text-xl">Income & Expense Trend</CardTitle>
+        <CardDescription>Overview of cash flow</CardDescription>
       </CardHeader>
       <CardContent className="flex-1 pb-0">
         <div className="h-[400px] w-full min-w-[300px]">
@@ -64,7 +71,8 @@ const AreaChartExample = ({
   ) : (
     <Card>
       <CardHeader>
-        <CardTitle>แนวโน้มรายรับรายจ่าย</CardTitle>
+        <CardTitle className="text-xl">Income & Expense Trend</CardTitle>
+        <CardDescription>Overview of cash flow</CardDescription>
       </CardHeader>
       <CardContent className="flex-1 pb-0">
         <div className="h-[400px] w-full min-w-[300px]">
@@ -136,7 +144,7 @@ const AreaChartExample = ({
             </ResponsiveContainer>
           ) : (
             <div className="flex h-full items-center justify-center text-muted-foreground">
-              ไม่มีข้อมูลธุรกรรมย้อนหลัง 6 เดือน
+              No transaction data available
             </div>
           )}
         </div>

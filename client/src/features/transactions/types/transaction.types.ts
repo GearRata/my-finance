@@ -1,6 +1,6 @@
-export type fetchTransaction = {
+export type Transaction = {
   type: string;
-  category: string;
+  categoryId: string;
   page: number;
   search: string;
   limit: number;
@@ -19,12 +19,22 @@ export type Categories = {
   type: string;
 };
 
-export type Count = {
-  total_income: number;
-  total_expense: number;
-  balance: number;
-};
-
 export type Total = {
   number: number;
+};
+
+export type CreateTransaction = {
+  account_id: number;
+  amount: number;
+  category_id: number;
+  note: string;
+  transaction_date: string;
+};
+
+export type UpdateTransaction = {
+  account_id: number;
+  amount: number;
+  category_id: number;
+  note: string;
+  transaction_date: string | undefined;
 };

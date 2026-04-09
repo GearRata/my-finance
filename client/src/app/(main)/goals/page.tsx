@@ -9,17 +9,7 @@ import {
   fetchGoals,
 } from "@/features/goals/services/goal.services";
 
-interface Total {
-  total_saved: number;
-  total_target: number;
-}
-
-interface Goals {
-  id: number;
-  name: string;
-  target_amount: number;
-  current_amount: number;
-}
+import type { Total, Goals } from "@/features/goals/types/goals.types";
 
 export default function GoalPage() {
   const [total, setTotal] = useState<Total>({

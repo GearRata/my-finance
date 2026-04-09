@@ -9,16 +9,14 @@ import { SectionPagination } from "@/features/transactions/components/sections/s
 import { getColumns } from "@/features/transactions/components/table/colums";
 
 import {
-  fetchCount,
   fetchSummaryCashFlow,
   fetchTransactions,
   fetchCatogories,
 } from "@/features/transactions/services/transaction.services";
 
 import type {
-  Count,
   Total,
-  fetchTransaction,
+  Transaction,
   Pagination,
   Categories,
 } from "@/features/transactions/types/transaction.types";
@@ -31,7 +29,7 @@ export default function TransactionPage() {
   const [search, setSearch] = useState<string>("");
   const [refresh, setRefresh] = useState<number>(0);
 
-  const [transactions, setTransactions] = useState<fetchTransaction[]>([]);
+  const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [pagination, setPagination] = useState<Pagination>({
     currentPage: 1,
     totalPages: 1,
@@ -39,7 +37,7 @@ export default function TransactionPage() {
     itemsPerPage: 10,
   });
   const [categoryList, setCategoryList] = useState<Categories[]>([]);
-  const [category, setCategory] = useState<string>("all");
+  const [categoryId, setCategoryId] = useState<string>("all");
   const [isLoading, setIsLoading] = useState<boolean>(true);
 
   useEffect(() => {
@@ -49,7 +47,7 @@ export default function TransactionPage() {
         const [summary, transaction, categories] = await Promise.all([
           fetchSummaryCashFlow(),
 
-          fetchTransactions({ type, category, page, search, limit: 10 }),
+          fetchTransactions({ type, categoryId, page, search, limit: 10 }),
           fetchCatogories(),
         ]);
 
@@ -60,13 +58,13 @@ export default function TransactionPage() {
         setPagination(transaction.pagination);
         setCategoryList(categories.data);
       } catch (error) {
-        console.error("❌ ดึงข้อมูลพลาด:", error);
+        console.error(" ดึงข้อมูลพลาด:", error);
       } finally {
         setIsLoading(false);
       }
     };
     fetchData();
-  }, [type, category, page, search, refresh]);
+  }, [type, categoryId, page, search, refresh]);
 
   const handleRefresh = useCallback(() => {
     setRefresh((prev) => prev + 1);
@@ -82,8 +80,8 @@ export default function TransactionPage() {
     setPage(1);
   }, []);
 
-  const handleCategoryChange = useCallback((newCategory: string) => {
-    setCategory(newCategory);
+  const handleCategoryIdChange = useCallback((newCategoryId: string) => {
+    setCategoryId(newCategoryId);
     setPage(1);
   }, []);
 
@@ -98,9 +96,9 @@ export default function TransactionPage() {
       <SectionCategories
         type={type}
         onTypeChange={handleTypeChange}
-        category={category}
+        categoryId={categoryId}
         onSearch={handleSearch}
-        onCategoryChange={handleCategoryChange}
+        onCategoryIdChange={handleCategoryIdChange}
         categoryList={categoryList}
       />
       <DataTable

@@ -1,14 +1,13 @@
 import {
   IconTrendingDown,
   IconTrendingUp,
-  IconWallet,
+  IconReceipt,
 } from "@tabler/icons-react";
 
 import {
   Card,
   CardAction,
   CardDescription,
-  CardFooter,
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
@@ -29,7 +28,7 @@ export function SectionCards({ data, loading }: any) {
             {totalNumber}
           </CardTitle>
           <CardAction>
-            <IconWallet size={64} />
+            <IconReceipt size={64} color="orange" />
           </CardAction>
         </CardHeader>
       </Card>
@@ -40,7 +39,11 @@ export function SectionCards({ data, loading }: any) {
             {formatCurrency(totalIncome)}
           </CardTitle>
           <CardAction>
-            <IconTrendingUp size={64} />
+            <IconTrendingDown
+              size={64}
+              style={{ transform: "scale(-1, 1)" }}
+              color="lime"
+            />
           </CardAction>
         </CardHeader>
       </Card>
@@ -51,7 +54,7 @@ export function SectionCards({ data, loading }: any) {
             {formatCurrency(totalExpense)}
           </CardTitle>
           <CardAction>
-            <IconTrendingDown size={64} />
+            <IconTrendingUp size={64} color="red" />
           </CardAction>
         </CardHeader>
       </Card>

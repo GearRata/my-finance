@@ -1,5 +1,9 @@
 import apiClient from "@/lib/api/axios";
-import type { fetchTransaction } from "../types/transaction.types";
+import type {
+  Transaction,
+  CreateTransaction,
+  UpdateTransaction,
+} from "../types/transaction.types";
 
 export const fetchCount = async () => {
   try {
@@ -26,16 +30,16 @@ export const fetchSummaryCashFlow = async () => {
 
 export const fetchTransactions = async ({
   type,
-  category,
+  categoryId,
   page,
   search,
   limit,
-}: fetchTransaction) => {
+}: Transaction) => {
   try {
     const response = await apiClient.get("/transactions", {
       params: {
         type,
-        category,
+        categoryId,
         page,
         search,
         limit,
@@ -58,7 +62,7 @@ export const fetchCatogories = async () => {
   }
 };
 
-export const CreateTransaction = async (payload: any) => {
+export const createTransaction = async (payload: CreateTransaction) => {
   try {
     const response = await apiClient.post("/transactions", payload);
     return response.data;
@@ -67,7 +71,13 @@ export const CreateTransaction = async (payload: any) => {
   }
 };
 
-export const UpdateTransaction = async ({ payload, id }: any) => {
+export const updateTransaction = async ({
+  payload,
+  id,
+}: {
+  payload: UpdateTransaction;
+  id: number;
+}) => {
   try {
     const response = await apiClient.put(`/transactions/${id}`, payload);
     return response.data;
@@ -76,7 +86,7 @@ export const UpdateTransaction = async ({ payload, id }: any) => {
   }
 };
 
-export const DeleteTransaction = async (id: number) => {
+export const deleteTransaction = async (id: number) => {
   try {
     const response = await apiClient.delete(`/transactions/${id}`);
     return response.data;

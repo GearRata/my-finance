@@ -37,7 +37,7 @@ import { Field, FieldLabel, FieldGroup } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
-import { CreateTransaction } from "../../services/transaction.services";
+import { createTransaction } from "../../services/transaction.services";
 import { toast } from "sonner";
 
 type Categories = {
@@ -101,7 +101,7 @@ export function SectionHeader({
         transaction_date: date?.toISOString(),
       };
 
-      await CreateTransaction(payload);
+      await createTransaction(payload);
       toast.success("Data has been recorded successfully", {
         position: "top-center",
       });

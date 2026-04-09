@@ -1,5 +1,4 @@
 import apiClient from "@/lib/api/axios";
-
 export const fetchTotal = async () => {
   try {
     const resposne = await apiClient.get("/goals/total");
@@ -20,7 +19,7 @@ export const fetchGoals = async () => {
   }
 };
 
-export const createGoal = async (data: any) => {
+export const createGoal = async (data: FormData) => {
   try {
     const response = await apiClient.post("/goals", data, {
       headers: { "Content-Type": "multipart/form-data" },

@@ -40,15 +40,15 @@ import { CalendarIcon, Delete } from "lucide-react";
 import { Calendar } from "@/components/ui/calendar";
 export type Transaction = {
   type: string;
-  category: string;
+  categoryId: string;
   page: number;
   search: string;
   limit: number;
 };
 
 import {
-  UpdateTransaction,
-  DeleteTransaction,
+  updateTransaction,
+  deleteTransaction,
 } from "../../services/transaction.services";
 
 function formatDate(date: Date | undefined) {
@@ -106,7 +106,7 @@ const EditAction = ({
         transaction_date: date?.toISOString(),
       };
 
-      await UpdateTransaction({ payload, id: transaction.id });
+      await updateTransaction({ payload, id: transaction.id });
 
       if (onRefresh) onRefresh();
     } catch (error) {}
@@ -280,7 +280,7 @@ const DeleteAction = ({ transaction, onRefresh }: any) => {
   const id = transaction?.id;
   const handleDelete = async () => {
     if (id) {
-      await DeleteTransaction(id);
+      await deleteTransaction(id);
       if (onRefresh) onRefresh();
     }
   };
