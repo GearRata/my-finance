@@ -1,17 +1,16 @@
-
-import { 
-  IconLayoutDashboard, 
-  IconReceipt2, 
-  IconTargetArrow, 
-  IconChartPie, 
-  IconSettings 
+import {
+  IconLayoutDashboard,
+  IconReceipt2,
+  IconTargetArrow,
+  IconChartPie,
+  IconSettings,
 } from "@tabler/icons-react";
 import { type Icon } from "@tabler/icons-react";
 
 export type NavItem = {
   title: string;
   url: string;
-  icon: Icon; 
+  icon: Icon;
 };
 
 export const MainNavigation: NavItem[] = [

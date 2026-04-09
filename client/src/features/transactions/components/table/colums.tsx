@@ -40,15 +40,15 @@ import { CalendarIcon, Delete } from "lucide-react";
 import { Calendar } from "@/components/ui/calendar";
 export type Transaction = {
   type: string;
-  category: string;
+  categoryId: string;
   page: number;
   search: string;
   limit: number;
 };
 
 import {
-  UpdateTransaction,
-  DeleteTransaction,
+  updateTransaction,
+  deleteTransaction,
 } from "../../services/transaction.services";
 
 function formatDate(date: Date | undefined) {
@@ -72,10 +72,12 @@ const EditAction = ({
   transaction,
   categoryList,
   accountList,
+  onRefresh,
 }: {
   transaction: any;
   categoryList: any[];
   accountList: any;
+  onRefresh?: () => void;
 }) => {
   const [type, setType] = useState(transaction.categories.type);
   const [amount, setAmount] = useState(transaction.amount);
@@ -104,7 +106,9 @@ const EditAction = ({
         transaction_date: date?.toISOString(),
       };
 
-      await UpdateTransaction({ payload, id: transaction.id });
+      await updateTransaction({ payload, id: transaction.id });
+
+      if (onRefresh) onRefresh();
     } catch (error) {}
   };
 
@@ -272,11 +276,12 @@ const EditAction = ({
   );
 };
 
-const DeleteAction = ({ transaction }: any) => {
+const DeleteAction = ({ transaction, onRefresh }: any) => {
   const id = transaction?.id;
   const handleDelete = async () => {
     if (id) {
-      await DeleteTransaction(id);
+      await deleteTransaction(id);
+      if (onRefresh) onRefresh();
     }
   };
   return (
@@ -293,6 +298,7 @@ const DeleteAction = ({ transaction }: any) => {
 export const getColumns = ({
   categoryList,
   account,
+  onRefresh,
 }: any): ColumnDef<Transaction>[] => [
   {
     accessorKey: "transaction_date",
@@ -337,8 +343,9 @@ export const getColumns = ({
             transaction={transaction}
             categoryList={categoryList}
             accountList={account}
+            onRefresh={onRefresh}
           />
-          <DeleteAction transaction={transaction} />
+          <DeleteAction transaction={transaction} onRefresh={onRefresh} />
         </div>
       );
     },

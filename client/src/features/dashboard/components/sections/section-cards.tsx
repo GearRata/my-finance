@@ -2,6 +2,7 @@ import {
   IconTrendingDown,
   IconTrendingUp,
   IconWallet,
+  IconCalendarStats,
 } from "@tabler/icons-react";
 
 import {
@@ -27,52 +28,58 @@ export function SectionCards({ data, loading }: TotalProps) {
   const totalIncome = data.total_income || 0;
   const totalExpense = data.total_expense || 0;
   const balance = data.balance || 0;
-  const savingsRate =
-    totalIncome > 0 ? ((balance / totalIncome) * 100).toFixed(1) : "0.0";
+  const currentDay = new Date().getDate();
+  const dailyAverage = totalExpense > 0 ? totalExpense / currentDay : 0;
 
   return loading ? (
     <div className="grid grid-cols-2 gap-4 lg:grid-cols-4 ">
       <Card className="@container/card">
         <CardHeader>
-          <CardDescription>Total Income</CardDescription>
+          <CardDescription className="text-xl"> Total Income</CardDescription>
           <CardTitle className="text-3xl font-semibold tabular-nums @[250px]/card:text-4xl">
             <Skeleton className="h-8 w-full" />
           </CardTitle>
           <CardAction>
-            <IconTrendingUp size={64} />
+            <IconTrendingUp
+              size={76}
+              style={{ transform: "scale(-1, 1)" }}
+              color="lime"
+            />
           </CardAction>
         </CardHeader>
       </Card>
       <Card className="@container/card">
         <CardHeader>
-          <CardDescription>Total Expense</CardDescription>
+          <CardDescription className="text-xl">Total Expense</CardDescription>
           <CardTitle className="text-3xl font-semibold tabular-nums @[250px]/card:text-4xl">
             <Skeleton className="h-8 w-full" />
           </CardTitle>
           <CardAction>
-            <IconTrendingDown size={64} />
+            <IconTrendingDown size={76} color="red" />
           </CardAction>
         </CardHeader>
       </Card>
       <Card className="@container/card">
         <CardHeader>
-          <CardDescription>Balance</CardDescription>
+          <CardDescription className="text-xl">Balance</CardDescription>
           <CardTitle className="text-3xl font-semibold tabular-nums @[250px]/card:text-4xl">
             <Skeleton className="h-8 w-full" />
           </CardTitle>
           <CardAction>
-            <IconWallet size={64} />
+            <IconWallet size={76} color="yellow" />
           </CardAction>
         </CardHeader>
       </Card>
       <Card className="@container/card">
         <CardHeader>
-          <CardDescription>Savings Rate</CardDescription>
+          <CardDescription className="text-xl">
+            Daily Avg Expense
+          </CardDescription>
           <CardTitle className="text-3xl font-semibold tabular-nums @[250px]/card:text-4xl">
             <Skeleton className="h-8 w-full" />
           </CardTitle>
           <CardAction>
-            <IconTrendingUp />
+            <IconCalendarStats size={76} color="indigo" />
           </CardAction>
         </CardHeader>
       </Card>
@@ -81,45 +88,51 @@ export function SectionCards({ data, loading }: TotalProps) {
     <div className="grid grid-cols-2 gap-4 lg:grid-cols-4 ">
       <Card className="@container/card">
         <CardHeader>
-          <CardDescription>Total Income</CardDescription>
+          <CardDescription className="text-xl">Total Income</CardDescription>
           <CardTitle className="text-3xl font-semibold tabular-nums @[250px]/card:text-4xl">
             {formatCurrency(totalIncome)}
           </CardTitle>
           <CardAction>
-            <IconTrendingUp size={64} />
+            <IconTrendingDown
+              size={76}
+              style={{ transform: "scale(-1, 1)" }}
+              color="lime"
+            />
           </CardAction>
         </CardHeader>
       </Card>
       <Card className="@container/card">
         <CardHeader>
-          <CardDescription>Total Expense</CardDescription>
+          <CardDescription className="text-xl">Total Expense</CardDescription>
           <CardTitle className="text-3xl font-semibold tabular-nums @[250px]/card:text-4xl">
             {formatCurrency(totalExpense)}
           </CardTitle>
           <CardAction>
-            <IconTrendingDown size={64} />
+            <IconTrendingUp size={76} color="red" />
           </CardAction>
         </CardHeader>
       </Card>
       <Card className="@container/card">
         <CardHeader>
-          <CardDescription>Balance</CardDescription>
+          <CardDescription className="text-xl">Balance</CardDescription>
           <CardTitle className="text-3xl font-semibold tabular-nums @[250px]/card:text-4xl">
             {formatCurrency(balance)}
           </CardTitle>
           <CardAction>
-            <IconWallet size={64} />
+            <IconWallet size={76} color="yellow" />
           </CardAction>
         </CardHeader>
       </Card>
       <Card className="@container/card">
         <CardHeader>
-          <CardDescription>Savings Rate</CardDescription>
+          <CardDescription className="text-xl">
+            Daily Avg Expense
+          </CardDescription>
           <CardTitle className="text-3xl font-semibold tabular-nums @[250px]/card:text-4xl">
-            {savingsRate}%
+            {formatCurrency(dailyAverage)}
           </CardTitle>
           <CardAction>
-            <IconTrendingUp />
+            <IconCalendarStats size={76} color="indigo" />
           </CardAction>
         </CardHeader>
       </Card>

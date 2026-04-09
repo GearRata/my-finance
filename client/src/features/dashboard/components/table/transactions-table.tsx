@@ -27,10 +27,8 @@ export function TableTranscation({ data, loading }: TransactionProps) {
   return loading ? (
     <Card>
       <CardHeader className="items-center pb-0">
-        <CardTitle className="text-2xl">Recent List</CardTitle>
-        <CardDescription className="text-xl">
-          5 Recent Transactions
-        </CardDescription>
+        <CardTitle className="text-xl">Recent Transactions</CardTitle>
+        <CardDescription>Latest 5 Transactions</CardDescription>
       </CardHeader>
       <CardContent>
         <div className="h-[400px] w-full min-w-[300px]">
@@ -60,26 +58,22 @@ export function TableTranscation({ data, loading }: TransactionProps) {
   ) : (
     <Card>
       <CardHeader className="items-center pb-0">
-        <CardTitle className="text-2xl">Recent List</CardTitle>
-        <CardDescription className="text-xl">
-          5 Recent Transactions
-        </CardDescription>
+        <CardTitle className="text-xl">Recent Transactions</CardTitle>
+        <CardDescription>Latest 5 Transactions</CardDescription>
       </CardHeader>
       <CardContent>
         <div className="h-[400px] w-full min-w-[300px]">
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead className="w-[100px] text-lg">List</TableHead>
-                <TableHead className="text-right text-lg">Amount</TableHead>
+                <TableHead className="w-[100px] text-xl">List</TableHead>
+                <TableHead className="text-right text-xl">Amount</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {data.map((items) => (
                 <TableRow key={items.id}>
-                  <TableCell className="font-medium text-lg">
-                    {items.note}
-                  </TableCell>
+                  <TableCell className=" text-lg py-5">{items.note}</TableCell>
                   <TableCell className="text-right text-lg">
                     {items.amount}
                   </TableCell>

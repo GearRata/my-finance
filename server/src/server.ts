@@ -14,14 +14,14 @@ import userRoutes from "./routes/user.routes.js";
 import { connectDB } from "./config/db.js";
 
 const app = express();
-const port = 5000;
+const port = process.env.PORT;
 
 //Middleware
 app.use(morgan("dev"));
 app.use(express.json());
 app.use(cookieParser());
 app.use(helmet());
-app.use(cors({ origin: true, credentials: true }));
+app.use(cors({ origin: process.env.URL, credentials: true }));
 
 connectDB();
 

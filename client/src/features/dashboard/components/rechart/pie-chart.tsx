@@ -15,6 +15,7 @@ import {
   Sector,
   PieSectorDataItem,
   Tooltip,
+  Cell,
 } from "recharts";
 import { Skeleton } from "@/components/ui/skeleton";
 
@@ -25,6 +26,13 @@ interface PieTypeProps {
   isAnimationActive?: boolean;
   loading: boolean;
 }
+const COLORS = [
+  "var(--chart-1)",
+  "var(--chart-2)",
+  "var(--chart-3)",
+  "var(--chart-4)",
+  "var(--chart-5)",
+];
 
 const renderActiveShape = (props: PieSectorDataItem) => {
   const RADIAN = Math.PI / 180;
@@ -117,8 +125,8 @@ export default function ShapePieChart({
   return loading ? (
     <Card className="flex flex-col">
       <CardHeader className="items-center pb-0">
-        <CardTitle>สัดส่วนรายจ่าย</CardTitle>
-        <CardDescription>แยกตามหมวดหมู่เดือนปัจจุบัน</CardDescription>
+        <CardTitle className="text-xl">Expense Breakdown</CardTitle>
+        <CardDescription>By Category (Current Month)</CardDescription>
       </CardHeader>
       <CardContent className="flex-1 pb-0">
         <div className="h-[400px] w-full min-w-[300px]">
@@ -129,8 +137,8 @@ export default function ShapePieChart({
   ) : (
     <Card className="flex flex-col">
       <CardHeader className="items-center pb-0">
-        <CardTitle>สัดส่วนรายจ่าย</CardTitle>
-        <CardDescription>แยกตามหมวดหมู่เดือนปัจจุบัน</CardDescription>
+        <CardTitle className="text-xl">Expense Breakdown</CardTitle>
+        <CardDescription>By Category (Current Month)</CardDescription>
       </CardHeader>
       <CardContent className="flex-1 pb-0">
         <div className="h-[400px] w-full min-w-[300px]">
@@ -145,11 +153,18 @@ export default function ShapePieChart({
                 data={pieData}
                 cx="50%"
                 cy="50%"
-                innerRadius="65%"
-                outerRadius="85%" // ขยายรัศมีให้ใหญ่ขึ้น
+                innerRadius="50%"
+                outerRadius="70%"
                 dataKey="value"
                 isAnimationActive={isAnimationActive}
-              />
+              >
+                {pieData.map((entry, index) => (
+                  <Cell
+                    key={`cell-${index}`}
+                    fill={COLORS[index % COLORS.length]}
+                  />
+                ))}
+              </Pie>
               <Tooltip content={() => null} />
             </PieChart>
           </ResponsiveContainer>

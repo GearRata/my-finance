@@ -1,10 +1,10 @@
 import type { Request, Response } from "express";
-import { client } from "../config/db.js";
 import { sendSuccess, sendFail, sendError } from "../utils/apiResponse.js";
+import * as CategoriesService from "../services/categories.service.js";
 
 export const list = async (req: Request, res: Response) => {
   try {
-    const { rows } = await client.query("SELECT * FROM categories");
+    const rows = await CategoriesService.listCategories();
     return sendSuccess(res, rows, "List Categories");
   } catch (error) {
     console.log(error);
@@ -18,12 +18,9 @@ export const create = async (req: Request, res: Response) => {
     if (!name || !type) {
       return sendFail(res, "Name and type are required", "VALIDATION_ERROR", null, 400);
     }
-    const { rows } = await client.query(
-      "INSERT INTO categories (name, type, created_at) VALUES ($1, $2, NOW()) RETURNING *",
-      [name, type],
-    );
-    console.log(rows);
-    return sendSuccess(res, rows[0], "Category created", 201);
+    const newCategory = await CategoriesService.createCategory(name, type);
+    console.log([newCategory]);
+    return sendSuccess(res, newCategory, "Category created", 201);
   } catch (error) {
     console.log(error);
     return sendError(res);
@@ -40,15 +37,18 @@ export const update = async (req: Request, res: Response) => {
     if (!name || !type) {
       return sendFail(res, "Name and type are required", "VALIDATION_ERROR", null, 400);
     }
-    const { rows } = await client.query(
-      "UPDATE categories SET name = $1, type = $2, updated_at = NOW() WHERE id = $3 RETURNING *",
-      [name, type, id],
-    );
-    const updatedCategory = rows[0];
-    if (!updatedCategory) {
-      return sendFail(res, "Category not found", "NOT_FOUND", null, 404);
+
+    try {
+      const updatedCategory = await CategoriesService.updateCategory(id as string, name, type);
+      return sendSuccess(res, updatedCategory, "Category updated");
+    } catch (error: unknown) {
+      if (error instanceof Error) {
+        if (error.message === "Category not found") {
+          return sendFail(res, "Category not found", "NOT_FOUND", null, 404);
+        }
+      }
+      throw error;
     }
-    return sendSuccess(res, updatedCategory, "Category updated");
   } catch (error) {
     console.log(error);
     return sendError(res);
@@ -61,15 +61,18 @@ export const remove = async (req: Request, res: Response) => {
     if (!id) {
       return sendFail(res, "Id is required", "VALIDATION_ERROR", null, 400);
     }
-    const { rows } = await client.query(
-      "DELETE FROM categories WHERE id = $1 RETURNING *",
-      [id],
-    );
-    const DeleteCategory = rows[0];
-    if (!DeleteCategory) {
-      return sendFail(res, "Category not found", "NOT_FOUND", null, 404);
+
+    try {
+      await CategoriesService.removeCategory(id as string);
+      return sendSuccess(res, null, "Category removed");
+    } catch (error: unknown) {
+      if (error instanceof Error) {
+        if (error.message === "Category not found") {
+          return sendFail(res, "Category not found", "NOT_FOUND", null, 404);
+        }
+      }
+      throw error;
     }
-    return sendSuccess(res, null, "Category removed");
   } catch (error) {
     console.log(error);
     return sendError(res);
