@@ -47,7 +47,17 @@ export const fetchTransactions = async ({
     });
     return response.data;
   } catch (error) {
-    console.error("Error fetching dashboard summary:", error);
+    console.error("Error fetching Transactions:", error);
+    throw error;
+  }
+};
+
+export const fetchAccounts = async () => {
+  try {
+    const response = await apiClient.get("/accounts");
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching Accounts", error);
     throw error;
   }
 };
@@ -57,7 +67,7 @@ export const fetchCatogories = async () => {
     const response = await apiClient.get("/categories");
     return response.data;
   } catch (error) {
-    console.error("Error fetching dashboard summary:", error);
+    console.error("Error fetching Catgegories", error);
     throw error;
   }
 };
@@ -90,5 +100,7 @@ export const deleteTransaction = async (id: number) => {
   try {
     const response = await apiClient.delete(`/transactions/${id}`);
     return response.data;
-  } catch (error) {}
+  } catch (error) {
+    throw error;
+  }
 };

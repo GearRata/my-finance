@@ -1,8 +1,11 @@
 import * as AuthModel from "../models/auth.model.js";
 import bcrypt from "bcryptjs";
 
-export const register = async (email: string, password: string) => {
-  // 1. เช็คว่าอีเมลนี้มีคนใช้ไปหรือยัง
+export const register = async (
+  username: string,
+  email: string,
+  password: string,
+) => {
   const existingUser = await AuthModel.findUserByEmail(email);
   if (existingUser) {
     throw new Error("Email already exists");
@@ -11,8 +14,7 @@ export const register = async (email: string, password: string) => {
   // Hash password (นำรหัสมาเข้ารหัสแบบทางเดียวและ salt เพิ่มเข้าไป)
   const hashPassword = await bcrypt.hash(password, 10);
 
-  // 3. สร้าง User ใหม่ลงฐานข้อมูล
-  const newUser = await AuthModel.createUser(email, hashPassword);
+  const newUser = await AuthModel.createUser(username, email, hashPassword);
 
   return newUser;
 };

@@ -5,11 +5,14 @@ import * as AuthService from "../services/auth.service.js";
 
 export const register = async (req: Request, res: Response) => {
   try {
-    const { email, password } = req.body;
+    const { username, email, password } = req.body;
 
     // Validate request
     const errors: { field: string; detail: string }[] = [];
 
+    if (!username) {
+      errors.push({ field: "username", detail: "username is required." });
+    }
     // ตรวจสอบรูปแบบ email และ password
     if (!email) {
       errors.push({ field: "email", detail: "email is required." });
@@ -37,7 +40,7 @@ export const register = async (req: Request, res: Response) => {
     }
 
     try {
-      await AuthService.register(email, password);
+      await AuthService.register(username, email, password);
       return sendSuccess(res, null, "Register Success", 201);
     } catch (error: unknown) {
       // ใช้ if (error instanceof Error) เพื่อปลดล็อก type 'unknown'

@@ -13,21 +13,27 @@ export const findUserByEmail = async (email: string) => {
   return rows[0];
 };
 
-export const createUser = async (email: string, hashPassword: string) => {
+export const createUser = async (
+  username: string,
+  email: string,
+  hashPassword: string,
+) => {
   const query = `
       INSERT INTO 
         users (
+          username,
           email, 
           password, 
           created_at
         ) 
         VALUES (
           $1, 
-          $2, 
+          $2,
+          $3, 
           NOW()
         )
       RETURNING *;
     `;
-  const { rows } = await client.query(query, [email, hashPassword]);
+  const { rows } = await client.query(query, [username, email, hashPassword]);
   return rows[0];
 };

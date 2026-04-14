@@ -19,7 +19,7 @@ export function RegisterForm({
   ...props
 }: React.ComponentProps<"form">) {
   const router = useRouter();
-  const [fullname, setFullName] = useState("");
+  const [username, setUsername] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmpass, setConfirmPass] = useState("");
@@ -35,7 +35,7 @@ export function RegisterForm({
     }
 
     try {
-      await registerAPI({ fullname, email, password });
+      await registerAPI({ username, email, password });
       toast.success("Created Account Success", { position: "top-center" });
       router.push("/login");
     } catch (error) {
@@ -60,14 +60,14 @@ export function RegisterForm({
           )}
         </div>
         <Field>
-          <FieldLabel htmlFor="name">Full Name</FieldLabel>
+          <FieldLabel htmlFor="username">Username</FieldLabel>
           <Input
-            id="name"
+            id="username"
             type="text"
-            placeholder="John Doe"
+            placeholder=""
             required
-            value={fullname}
-            onChange={(e) => setFullName(e.target.value)}
+            value={username}
+            onChange={(e) => setUsername(e.target.value)}
             disabled={isLoading}
           />
         </Field>
@@ -76,7 +76,7 @@ export function RegisterForm({
           <Input
             id="email"
             type="email"
-            placeholder="m@example.com"
+            placeholder=""
             required
             value={email}
             onChange={(e) => setEmail(e.target.value)}

@@ -14,6 +14,7 @@ coverage
 out/
 
 # production
+build*
 build
 
 # misc
@@ -27,7 +28,7 @@ yarn-error.log*
 
 # local env files
 .env*.local
-.env
+.env*
 
 # vercel
 .vercel

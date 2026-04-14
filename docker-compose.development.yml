@@ -1,0 +1,78 @@
+services:
+
+  client-dev:
+    image: gearmcc/finance-client:dev
+    container_name: client-dev
+    ports:
+      - "3001:3000"
+    environment:
+      - NODE_ENV=development
+      - HOSTNAME=0.0.0.0
+    restart: unless-stopped
+    depends_on:
+      - server-dev
+    networks:
+      - finance-network
+
+
+  server-dev:
+    image: gearmcc/finance-server:dev
+    container_name: server-dev 
+    restart: unless-stopped
+    ports:
+      - "5001:5000"
+    env_file:
+      - ./server/.env.development
+    environment:
+      - TZ=Asia/Bangkok
+    depends_on:
+      - postgres-dev # บอกว่า backend ต้องรอให้ postgres รันก่อน
+    networks:
+      - finance-network
+
+
+  postgres-dev:
+    image: postgres:latest # To download the latest image
+    container_name: postgres-dev # Name of the container
+    restart: unless-stopped
+    shm_size: 128mb # set shared memory limit when using docker compose
+    env_file:
+      - ./server/.env.development
+    environment:
+      - TZ=Asia/Bangkok
+    ports:
+        - "5434:5432" # HOST_PORT:CONTAINER_PORT (เครื่องเราเข้าผ่าน 5434, ใน container คือ 5432)
+    volumes:
+        - ./server/src/db/schema.sql:/docker-entrypoint-initdb.d/schema.sql
+        - ./server/src/db/seed.sql:/docker-entrypoint-initdb.d/seed.sql
+        -  postgres-dev-data:/var/lib/postgresql/ # The defined VOLUME was changed in 18 and above to /var/lib/postgresql
+    networks:
+      - finance-network 
+
+
+  redis-dev:
+    image: redis:7-alpine
+    container_name: redis-dev
+    restart: unless-stopped
+    ports:
+      - "6380:6379"
+    volumes:
+      - redis-dev-data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    command: redis-server --appendonly yes --maxmemory 128mb --maxmemory-policy allkeys-lru
+    networks:
+      - finance-network
+
+
+volumes:
+  postgres-dev-data:
+  redis-dev-data:
+
+networks:
+  finance-network:
+    name: finance-dev-network
+    driver: bridge

@@ -1,0 +1,47 @@
+services:
+
+  postgres-local:
+    image: postgres:latest # To download the latest image
+    container_name: postgres-local # Name of the container
+    restart: unless-stopped
+    shm_size: 128mb # set shared memory limit when using docker compose
+    env_file:
+      - ./server/.env.local
+    environment:
+      - TZ=Asia/Bangkok
+    ports:
+        - "5435:5432" # HOST_PORT:CONTAINER_PORT (เครื่องเราเข้าผ่าน 5434, ใน container คือ 5432)
+    volumes:
+        - ./server/src/db/schema.sql:/docker-entrypoint-initdb.d/01_schema.sql
+        - ./server/src/db/seed.sql:/docker-entrypoint-initdb.d/02_seed.sql
+        -  postgres-local-data:/var/lib/postgresql/ # The defined VOLUME was changed in 18 and above to /var/lib/postgresql
+    networks:
+      - finance-network
+
+
+  redis-local:
+    image: redis:7-alpine
+    container_name: redis-local
+    restart: unless-stopped
+    ports:
+      - "6381:6379"
+    volumes:
+      - redis-local-data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    command: redis-server --appendonly yes --maxmemory 128mb --maxmemory-policy allkeys-lru
+    networks:
+      - finance-network
+
+
+volumes:
+  postgres-local-data:
+  redis-local-data:
+
+networks:
+  finance-network:
+    name: finance-local-network
+    driver: bridge

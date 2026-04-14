@@ -47,13 +47,15 @@ type Categories = {
 };
 
 type Account = {
-  account_id: number;
-  account_name: string;
+  id: number;
+  name: string;
+  balance: number;
+  user_id: number;
 };
 
 interface SectionTypeProps {
   categoryList: Categories[];
-  accountList: Account;
+  accountList: Account[];
   onRefresh?: () => void;
 }
 
@@ -82,6 +84,7 @@ export function SectionHeader({
   const [type, setType] = useState("income");
   const [amount, setAmount] = useState<string>("");
   const [categoryId, setCategory] = useState<string>("");
+  const [accountId, setAccountId] = useState<string>("");
   const [note, setNote] = useState<string>("");
 
   const [open, setOpen] = useState(false);
@@ -91,10 +94,20 @@ export function SectionHeader({
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    if (!accountId) {
+      toast.error("Please select an account", { position: "top-center" });
+      return;
+    }
+    if (!categoryId) {
+      toast.error("Please select a category", { position: "top-center" });
+      return;
+    }
+
     const date = new Date(value);
     try {
       const payload = {
-        account_id: Number(accountList.account_id),
+        account_id: Number(accountId),
         amount: Number(amount),
         category_id: Number(categoryId),
         note: note,
@@ -107,6 +120,9 @@ export function SectionHeader({
       });
 
       if (onRefresh) onRefresh();
+      setAmount("");
+      setCategory("");
+      setNote("");
     } catch (error) {
       toast.error("Something went wrong. Please try again.", {
         position: "top-center",
@@ -139,6 +155,31 @@ export function SectionHeader({
                 </DialogDescription>
               </DialogHeader>
               <FieldGroup className="py-6">
+                {/* Account */}
+                <Field>
+                  <Label>Account</Label>
+                  <Select
+                    value={accountId}
+                    onValueChange={(value) => value && setAccountId(value)}
+                  >
+                    <SelectTrigger className="w-full">
+                      <SelectValue placeholder="Select Account">
+                        {accountList.find((a) => String(a.id) === accountId)
+                          ?.name}
+                      </SelectValue>
+                    </SelectTrigger>
+                    <SelectContent alignItemWithTrigger={false}>
+                      <SelectGroup>
+                        {accountList.map((acc) => (
+                          <SelectItem key={acc.id} value={String(acc.id)}>
+                            {acc.name}
+                          </SelectItem>
+                        ))}
+                      </SelectGroup>
+                    </SelectContent>
+                  </Select>
+                </Field>
+
                 {/* Type */}
                 <Field>
                   <Label htmlFor="name-1">Type</Label>

@@ -11,6 +11,7 @@ import { getColumns } from "@/features/transactions/components/table/colums";
 import {
   fetchSummaryCashFlow,
   fetchTransactions,
+  fetchAccounts,
   fetchCatogories,
 } from "@/features/transactions/services/transaction.services";
 
@@ -18,12 +19,13 @@ import type {
   Total,
   Transaction,
   Pagination,
+  Accounts,
   Categories,
 } from "@/features/transactions/types/transaction.types";
 
 export default function TransactionPage() {
-  const [total, setTotal] = useState<Total>({ number: 0 });
-  const [account, setAccount] = useState<any>("");
+  const [summary, setSummary] = useState<Total>({ number: 0 });
+  const [account, setAccount] = useState<Accounts[]>([]);
   const [type, setType] = useState<string>("all");
   const [page, setPage] = useState<number>(1);
   const [search, setSearch] = useState<string>("");
@@ -44,16 +46,15 @@ export default function TransactionPage() {
     const fetchData = async () => {
       try {
         setIsLoading(true);
-        const [summary, transaction, categories] = await Promise.all([
+        const [summary, transaction, account, categories] = await Promise.all([
           fetchSummaryCashFlow(),
-
           fetchTransactions({ type, categoryId, page, search, limit: 10 }),
+          fetchAccounts(),
           fetchCatogories(),
         ]);
 
-        setTotal(summary.data);
-        setAccount(summary.data);
-
+        setSummary(summary.data);
+        setAccount(account.data);
         setTransactions(transaction.data);
         setPagination(transaction.pagination);
         setCategoryList(categories.data);
@@ -92,7 +93,7 @@ export default function TransactionPage() {
         accountList={account}
         onRefresh={handleRefresh}
       />
-      <SectionCards data={total} loading={isLoading} />
+      <SectionCards data={summary} loading={isLoading} />
       <SectionCategories
         type={type}
         onTypeChange={handleTypeChange}

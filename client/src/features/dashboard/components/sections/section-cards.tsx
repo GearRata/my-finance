@@ -25,9 +25,9 @@ interface TotalProps {
 }
 
 export function SectionCards({ data, loading }: TotalProps) {
-  const totalIncome = data.total_income || 0;
-  const totalExpense = data.total_expense || 0;
-  const balance = data.balance || 0;
+  const totalIncome = data?.total_income || 0;
+  const totalExpense = data?.total_expense || 0;
+  const balance = data?.balance || 0;
   const currentDay = new Date().getDate();
   const dailyAverage = totalExpense > 0 ? totalExpense / currentDay : 0;
 

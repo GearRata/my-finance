@@ -1,19 +1,31 @@
 import type { Request, Response } from "express";
-import { client } from "../config/db.js";
 import { sendSuccess, sendFail, sendError } from "../utils/apiResponse.js";
 import * as TransactionService from "../services/transactions.service.js";
+import { redisClient } from "../config/db.js";
 
 export const list = async (req: Request, res: Response) => {
   try {
     const { limit } = req.params;
     const user_id = req.user.id;
+    const cacheKey = `list:${user_id}`;
 
-    const transactions = await TransactionService.getTransaction(
+    const cachedData = await redisClient.get(cacheKey);
+    if (cachedData) {
+      console.log("CACHE HIT: Returning list from Redis");
+      return sendSuccess(
+        res,
+        JSON.parse(cachedData),
+        "Recent Transactions (Cached)",
+      );
+    }
+    console.log("CACHE MISS: Fetching list from DB and saving to Redis");
+    const result = await TransactionService.getTransaction(
       user_id,
       Number(limit),
     );
+    await redisClient.setEx(cacheKey, 3600, JSON.stringify(result || null));
 
-    return sendSuccess(res, transactions, `${limit} Recent Transactions`);
+    return sendSuccess(res, result, `${limit} Recent Transactions`);
   } catch (error) {
     console.log(error);
     return sendError(res);
@@ -57,8 +69,20 @@ export const pagination = async (req: Request, res: Response) => {
 export const summary = async (req: Request, res: Response) => {
   try {
     const user_id = req.user.id;
+    const cacheKey = `summary:${user_id}`;
 
+    const cachedData = await redisClient.get(cacheKey);
+    if (cachedData) {
+      console.log("CACHE HIT: Returning summary from Redis");
+      return sendSuccess(
+        res,
+        JSON.parse(cachedData),
+        "Total Cash In-Flow/Out-Flow (Cached)",
+      );
+    }
+    console.log("CACHE MISS: Fetching summary from DB and saving to Redis");
     const result = await TransactionService.summaryTransactions(user_id);
+    await redisClient.setEx(cacheKey, 3600, JSON.stringify(result || null));
 
     return sendSuccess(res, result, "Total Cash In-Flow/Out-Flow");
   } catch (error) {
@@ -70,8 +94,20 @@ export const summary = async (req: Request, res: Response) => {
 export const analytics = async (req: Request, res: Response) => {
   try {
     const user_id = req.user.id;
+    const cacheKey = `analytics:${user_id}`;
 
+    const cachedData = await redisClient.get(cacheKey);
+    if (cachedData) {
+      console.log("CACHE HIT: Returning analytics from Redis");
+      return sendSuccess(
+        res,
+        JSON.parse(cachedData),
+        "Retrieved dashboard data successfully",
+      );
+    }
+    console.log("CACHE MISS: Fetching analytics from DB and saving to Redis");
     const result = await TransactionService.analyticeTransactions(user_id);
+    await redisClient.setEx(cacheKey, 3600, JSON.stringify(result || null));
 
     return sendSuccess(res, result, "Retrieved dashboard data successfully");
   } catch (error) {
@@ -120,6 +156,13 @@ export const create = async (req: Request, res: Response) => {
       category_id,
       transaction_date,
     );
+
+    await Promise.all([
+      redisClient.del(`summary:${user_id}`),
+      redisClient.del(`analytics:${user_id}`),
+      redisClient.del(`list:${user_id}`),
+    ]);
+
     return sendSuccess(res, result, "Created", 201);
   } catch (error) {
     console.log(error);
@@ -169,6 +212,11 @@ export const update = async (req: Request, res: Response) => {
       transaction_date,
       Number(id),
     );
+    await Promise.all([
+      redisClient.del(`summary:${user_id}`),
+      redisClient.del(`analytics:${user_id}`),
+      redisClient.del(`list:${user_id}`),
+    ]);
 
     return sendSuccess(res, result, "Updated");
   } catch (error) {
@@ -186,6 +234,11 @@ export const remove = async (req: Request, res: Response) => {
       Number(id),
       user_id,
     );
+    await Promise.all([
+      redisClient.del(`summary:${user_id}`),
+      redisClient.del(`analytics:${user_id}`),
+      redisClient.del(`list:${user_id}`),
+    ]);
 
     return sendSuccess(res, result, "A Transaction is delete");
   } catch (error) {

@@ -13,6 +13,13 @@ export type Pagination = {
   itemsPerPage: number;
 };
 
+export type Accounts = {
+  id: number;
+  name: string;
+  balance: number;
+  user_id: number;
+};
+
 export type Categories = {
   id: number;
   name: string;

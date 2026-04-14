@@ -60,10 +60,16 @@ export default function DashboardPage() {
         <h1>Overview</h1>
       </div>
       <SectionCards data={summary} loading={isLoading} />
+      <div className="grid gap-4 lg:grid-cols-3">
+        <div className="col-span-2">
+          <StackedAreaChart trendData={analytics.trend} loading={isLoading} />
+        </div>
+        <div className="col-span-1 ">
+          <TableTranscation data={transaction} loading={isLoading} />
+        </div>
+      </div>
       <div className="grid gap-4 lg:grid-cols-2">
-        <StackedAreaChart trendData={analytics.trend} loading={isLoading} />
         <ShapePieChart pieData={analytics.pie} loading={isLoading} />
-        <TableTranscation data={transaction} loading={isLoading} />
         <SectionGoal data={goal} loading={isLoading} />
       </div>
     </div>

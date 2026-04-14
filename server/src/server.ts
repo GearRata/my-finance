@@ -11,7 +11,7 @@ import goalsRoutes from "./routes/goals.routes.js";
 import transactionRoutes from "./routes/transactions.routes.js";
 import adminRoutes from "./routes/admin.routes.js";
 import userRoutes from "./routes/user.routes.js";
-import { connectDB } from "./config/db.js";
+import { connectDB, connectRedis } from "./config/db.js";
 
 const app = express();
 const port = process.env.PORT;
@@ -21,9 +21,15 @@ app.use(morgan("dev"));
 app.use(express.json());
 app.use(cookieParser());
 app.use(helmet());
-app.use(cors({ origin: process.env.URL, credentials: true }));
+app.use(
+  cors({
+    origin: process.env.ALLOWED_ORIGINS?.split(","),
+    credentials: true,
+  }),
+);
 
 connectDB();
+connectRedis();
 
 app.use("/api", authRoutes);
 app.use("/api", categoriesRoutes);

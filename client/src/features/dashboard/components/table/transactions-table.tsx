@@ -25,7 +25,7 @@ interface TransactionProps {
 }
 export function TableTranscation({ data, loading }: TransactionProps) {
   return loading ? (
-    <Card>
+    <Card className="h-full">
       <CardHeader className="items-center pb-0">
         <CardTitle className="text-xl">Recent Transactions</CardTitle>
         <CardDescription>Latest 5 Transactions</CardDescription>
@@ -43,10 +43,10 @@ export function TableTranscation({ data, loading }: TransactionProps) {
               {Array.from({ length: 5 }).map((_, i) => (
                 <TableRow key={i}>
                   <TableCell>
-                    <Skeleton className="h-6 w-full" />
+                    <Skeleton className="h-13 w-full" />
                   </TableCell>
                   <TableCell>
-                    <Skeleton className="h-6 w-full" />
+                    <Skeleton className="h-13 w-full" />
                   </TableCell>
                 </TableRow>
               ))}
@@ -56,7 +56,7 @@ export function TableTranscation({ data, loading }: TransactionProps) {
       </CardContent>
     </Card>
   ) : (
-    <Card>
+    <Card className="h-full">
       <CardHeader className="items-center pb-0">
         <CardTitle className="text-xl">Recent Transactions</CardTitle>
         <CardDescription>Latest 5 Transactions</CardDescription>

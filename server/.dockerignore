@@ -1,6 +1,7 @@
 node_modules
+dist
 npm-debug.log
-Dockerfile
-.dockerignore
 .git
-.env
+test_query_speed.ts
+.env.local
+.env.*.local
