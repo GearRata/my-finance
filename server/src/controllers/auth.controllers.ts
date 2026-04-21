@@ -161,7 +161,11 @@ export const logout = async (req: Request, res: Response) => {
 export const currentUser = async (req: Request, res: Response) => {
   try {
     // authCheck ดึงข้อมูลมาใส่ req.user ไว้แล้ว
-    return sendSuccess(res, req.user, "Current User");
+    return sendSuccess(
+      res,
+      { user: req.user, has_account: req.has_account },
+      "Current User"
+    );
   } catch (error) {
     return sendError(res);
   }

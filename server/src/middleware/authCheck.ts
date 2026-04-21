@@ -4,10 +4,11 @@ import type { Request, Response, NextFunction } from "express";
 
 interface UserRow {
   id: number;
+  username: string;
   email: string;
   role: string;
   enabled: boolean;
-  created_at: Date;
+  has_account?: number;
 }
 
 export const authCheck = async (
@@ -32,12 +33,17 @@ export const authCheck = async (
     ) as jwt.JwtPayload;
 
     const query = `
-            SELECT 
-                id, email, created_at, role, enabled
-            FROM 
-                users
-            WHERE 
-                email = $1
+          SELECT
+              u.id, 
+              u.username, 
+              u.email, 
+              u.role, 
+              u.enabled,
+              COUNT(a.id)::int as has_account
+          FROM users u
+          LEFT JOIN accounts a ON a.user_id = u.id
+          WHERE email = $1
+          GROUP BY u.id
         `;
 
     const { rows } = await client.query(query, [decoded.email]);
@@ -51,8 +57,11 @@ export const authCheck = async (
       return res.status(400).json({ message: "This account cannot access" });
     }
 
-    // req จะเก็บข้อมูล object ของ currentUser
-    req.user = currentUser;
+    const { has_account, ...userData } = currentUser;
+
+    req.user = userData;
+    req.has_account = has_account;
+
     next();
   } catch (error) {
     console.log(error);

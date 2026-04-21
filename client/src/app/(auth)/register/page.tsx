@@ -16,7 +16,7 @@ export default function RegisterPage() {
           alt="logo"
           loading="eager"
           fill
-          sizes="100vw"
+          sizes="(max-width: 768px) 100vw, 400px"
           style={{ maxWidth: "100%", objectFit: "cover" }}
         />
       </div>

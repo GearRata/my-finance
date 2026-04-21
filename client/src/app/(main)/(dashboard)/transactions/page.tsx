@@ -88,6 +88,7 @@ export default function TransactionPage() {
 
   return (
     <div className="flex flex-1 flex-col gap-4 p-4 ">
+      {/* <SectionScanSlip categoryList={categoryList} accountList={account} /> */}
       <SectionHeader
         categoryList={categoryList}
         accountList={account}

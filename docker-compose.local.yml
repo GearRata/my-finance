@@ -12,8 +12,8 @@ services:
     ports:
         - "5435:5432" # HOST_PORT:CONTAINER_PORT (เครื่องเราเข้าผ่าน 5434, ใน container คือ 5432)
     volumes:
-        - ./server/src/db/schema.sql:/docker-entrypoint-initdb.d/01_schema.sql
-        - ./server/src/db/seed.sql:/docker-entrypoint-initdb.d/02_seed.sql
+        - ./server/src/db/schema.sql:/docker-entrypoint-initdb.d/schema.sql
+        - ./server/src/db/seed.sql:/docker-entrypoint-initdb.d/seed.sql
         -  postgres-local-data:/var/lib/postgresql/ # The defined VOLUME was changed in 18 and above to /var/lib/postgresql
     networks:
       - finance-network

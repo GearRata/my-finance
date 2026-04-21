@@ -72,6 +72,18 @@ export const fetchCatogories = async () => {
   }
 };
 
+export const fetchScanSlip = async (data: FormData) => {
+  try {
+    const response = await apiClient.post("/transactions/scanslip", data, {
+      headers: { "Content-Type": "multipart/form-data" },
+    });
+    return response.data.data;
+  } catch (error) {
+    console.error("Error Scan", error);
+    throw error;
+  }
+};
+
 export const createTransaction = async (payload: CreateTransaction) => {
   try {
     const response = await apiClient.post("/transactions", payload);

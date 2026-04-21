@@ -115,7 +115,6 @@ export const create = async (req: Request, res: Response) => {
   try {
     const user_id = req.user.id;
     const { name, target_amount, current_amount, due_date, images } = req.body;
-    console.log(images);
 
     if (!name || !target_amount || !user_id) {
       return sendFail(
@@ -340,7 +339,6 @@ export const uploadImages = async (
     // ยัด imageUrls กลับเข้าไปใน req.body.images จะได้ตรงกับที่ดึงออกมาใน create และ update
     req.body.images = imageUrls;
 
-    // เรียก next() แค่ครั้งเดียวหลังจากอัปโหลดครบแล้ว (หรือไม่มีรูปก็ผ่านไปได้)
     next();
   } catch (error) {
     console.log(error);
