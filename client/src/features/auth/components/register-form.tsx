@@ -11,7 +11,7 @@ import {
   FieldSeparator,
 } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
-import { registerAPI } from "../services/auth.services";
+import { register } from "../services/auth.services";
 import { toast } from "sonner";
 
 export function RegisterForm({
@@ -35,7 +35,7 @@ export function RegisterForm({
     }
 
     try {
-      await registerAPI({ username, email, password });
+      await register({ username, email, password });
       toast.success("Created Account Success", { position: "top-center" });
       router.push("/login");
     } catch (error) {

@@ -3,13 +3,13 @@ import type { Request } from "express";
 declare global {
   namespace Express {
     interface Request {
-      // ระบุโครงสร้างของ user ที่คุณใช้ในโปรเจกต์
+      // ระบุโครงสร้างของ user
       user: {
         id: number;
         email: string;
+        username: string;
         role: string;
         enabled: boolean;
-        created_at?: Date;
       };
       images?: Array<{
         asset_id: string;
@@ -17,6 +17,7 @@ declare global {
         url: string;
         secure_url: string;
       }>;
+      has_account?: number | undefined;
     }
   }
 }

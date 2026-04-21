@@ -1,7 +1,10 @@
+import fs from "fs";
 import type { Request, Response } from "express";
 import { sendSuccess, sendFail, sendError } from "../utils/apiResponse.js";
 import * as TransactionService from "../services/transactions.service.js";
 import { redisClient } from "../config/db.js";
+import FormData from "form-data";
+import axios from "axios";
 
 export const list = async (req: Request, res: Response) => {
   try {
@@ -273,5 +276,35 @@ export const searchFilter = async (req: Request, res: Response) => {
   } catch (error) {
     console.log(error);
     return sendError(res);
+  }
+};
+
+export const scanslip = async (req: Request, res: Response) => {
+  try {
+    const file = req.file;
+
+    if (!file) {
+      return res.status(400).json({ message: "No file uploaded" });
+    }
+
+    const form = new FormData();
+    form.append("files", fs.createReadStream(file.path));
+
+    const slipResponse = await axios.post(`${process.env.SLIPOK_API}`, form, {
+      headers: {
+        "x-authorization": `${process.env.SLIPOK_API_KEY}`,
+        ...form.getHeaders(),
+      },
+    });
+
+    fs.unlinkSync(file.path);
+
+    const slipData = slipResponse.data;
+    res.status(200).json({ message: "Success", data: slipData });
+  } catch (error: any) {
+    console.error("Error from SlipOK:", error?.response?.data || error);
+    res
+      .status(500)
+      .json({ message: "เกิดข้อผิดพลาด", error: error?.response?.data });
   }
 };

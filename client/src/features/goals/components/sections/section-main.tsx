@@ -19,16 +19,9 @@ import {
   InputGroupButton,
   InputGroupInput,
 } from "@/components/ui/input-group";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import {
   Empty,
-  EmptyContent,
   EmptyDescription,
   EmptyHeader,
   EmptyMedia,
@@ -48,10 +41,18 @@ import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Progress } from "@/components/ui/progress";
-import { CircularProgress } from "@/components/progress-09";
+import { CircularProgress } from "@/components/common/progress";
 import { formatCurrency } from "@/lib/utils";
 import noImage from "../../../../../public/assets/images/No_Image.jpg";
 import { createGoal } from "../../services/goal.services";
+import { toast } from "sonner";
+import {
+  Carousel,
+  CarouselContent,
+  CarouselItem,
+  CarouselNext,
+  CarouselPrevious,
+} from "@/components/ui/carousel";
 
 interface TypeGoals {
   id: number;
@@ -92,11 +93,14 @@ export function SectionMain({ goal }: GoalsProps) {
   const [month, setMonth] = useState<Date | undefined>(date);
   const [value, setValue] = useState(formatDate(date));
 
+  const [isLoading, setIsLoaidng] = useState<boolean>(false);
+
   const [files, setFiles] = useState<File[]>([]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
+      setIsLoaidng(true);
       const form = new FormData();
 
       form.append("name", name);
@@ -107,16 +111,22 @@ export function SectionMain({ goal }: GoalsProps) {
       files.forEach((file) => {
         form.append("images", file);
       });
-      console.log(files);
 
       await createGoal(form);
+      toast.success("Goal has been recorded successfully", {
+        position: "top-center",
+      });
     } catch (error) {
       console.error("เจอแล้ว สาเหตุที่หยุดทำงาน:", error);
+    } finally {
+      setIsLoaidng(true);
     }
   };
 
+  console.log(goal);
+
   return (
-    <section className="grid grid-cols-1 gap-4 lg:grid-cols-3">
+    <section className="grid grid-cols-1 gap-4 lg:grid-cols-3 h-[600px]">
       {goal.map((g) => {
         const percent =
           g.target_amount > 0
@@ -130,20 +140,45 @@ export function SectionMain({ goal }: GoalsProps) {
             className="relative overflow-hidden h-[600px] flex flex-col justify-end border-0 shadow-2xl group"
           >
             <div className="absolute inset-0 z-0">
-              <Image
-                src={
-                  g.images && g.images.length > 0
-                    ? g.images[0].secure_url
-                    : noImage
-                }
-                alt="background"
-                fill
-                // ป้องกัน Next.js ท้วงเรื่อง Domain หากยังไม่ได้ตั้งค่า next.config.ts
-                className="object-cover object-[50%_125%] transition-transform duration-700 group-hover:scale-105"
-              />
+              <Carousel opts={{ loop: true }} className="w-full h-full">
+                <CarouselContent className="h-full ml-0">
+                  {g.images && g.images.length > 0 ? (
+                    g.images.map((img: any, idx: number) => (
+                      <CarouselItem
+                        key={idx}
+                        className="relative w-full h-[600px] pl-0"
+                      >
+                        <Image
+                          src={img.secure_url || img.url}
+                          alt={`goal-image-${idx}`}
+                          fill
+                          loading="eager"
+                          className="object-cover object-[50%_125%] transition-transform duration-700 group-hover:scale-105"
+                        />
+                      </CarouselItem>
+                    ))
+                  ) : (
+                    <CarouselItem className="relative w-full h-[600px] pl-0">
+                      <Image
+                        src={noImage}
+                        alt="background"
+                        fill
+                        loading="eager"
+                        className="object-cover object-[50%_125%] transition-transform duration-700 group-hover:scale-105"
+                      />
+                    </CarouselItem>
+                  )}
+                </CarouselContent>
+                {g.images && g.images.length > 1 && (
+                  <>
+                    <CarouselPrevious className="absolute left-4 top-1/2 -translate-y-1/2 z-30" />
+                    <CarouselNext className="absolute right-4 top-1/2 -translate-y-1/2 z-30 " />
+                  </>
+                )}
+              </Carousel>
             </div>
 
-            <div className="absolute inset-0 z-0 bg-linear-to-t from-[rgb(0,0,0)] from-15% via-[rgba(39,39,39,0.8)] via-40% to-transparent" />
+            {/* <div className="absolute inset-0 z-0 pointer-events-none bg-linear-to-t from-[rgb(0,0,0)] from-5% via-[rgba(39,39,39,0.8)] via-20% to-transparent" /> */}
 
             <div className="absolute top-4 right-4 z-20">
               <Dialog>
@@ -210,8 +245,8 @@ export function SectionMain({ goal }: GoalsProps) {
                       <p>{formatCurrency(g.target_amount)}</p>
                     </div>
                     <Progress
-                      trackClassName="h-3 "
-                      indicatorClassName="bg-linear-to-r from-gray-400 to-zinc-300 "
+                      trackClassName="h-3 bg-white/30"
+                      indicatorClassName="bg-linear-to-r from-white to-slate-200 shadow-[0_0_10px_rgba(255,255,255,0.5)]"
                       value={percent}
                     />
                     {remaining > 0 && (
@@ -231,7 +266,9 @@ export function SectionMain({ goal }: GoalsProps) {
                     )}
                   </div>
                   <CircularProgress
-                    labelClassName="text-xl font-bold"
+                    className="stroke-white/30"
+                    progressClassName="stroke-white drop-shadow-[0_0_8px_rgba(255,255,255,0.6)]"
+                    labelClassName="text-2xl font-black text-white drop-shadow-md"
                     renderLabel={(progress) => `${progress}%`}
                     showLabel
                     size={130}
@@ -250,7 +287,7 @@ export function SectionMain({ goal }: GoalsProps) {
             <Dialog>
               <DialogTrigger
                 render={
-                  <Button className="py-6 px-4 rounded-full bg-ring text-white">
+                  <Button className="py-6 px-4 rounded-full bg-ring text-white transition duration-100 ease-in-out hover:scale-110">
                     <IconPlus />
                   </Button>
                 }
@@ -262,7 +299,6 @@ export function SectionMain({ goal }: GoalsProps) {
                     <DialogDescription>Record your new Goal</DialogDescription>
                   </DialogHeader>
                   <FieldGroup className="py-6">
-                    {/* Type */}
                     <Field>
                       <Label htmlFor="name">Name</Label>
                       <Input
@@ -358,7 +394,9 @@ export function SectionMain({ goal }: GoalsProps) {
                     <DialogClose
                       render={<Button variant="outline">Cancel</Button>}
                     />
-                    <Button type="submit">Save changes</Button>
+                    <Button type="submit">
+                      {isLoading ? "Saving changes..." : "Save changes"}
+                    </Button>
                   </DialogFooter>
                 </form>
               </DialogContent>

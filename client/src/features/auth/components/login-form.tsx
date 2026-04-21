@@ -14,7 +14,10 @@ import {
 } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import Image from "next/image";
-import { loginAPI } from "@/features/auth/services/auth.services";
+import {
+  login,
+  checkCurrentUser,
+} from "@/features/auth/services/auth.services";
 import { toast } from "sonner";
 
 export function LoginForm({
@@ -29,15 +32,21 @@ export function LoginForm({
 
   const handleLogin = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    setError(""); // ล้าง error เก่าออกก่อน
+    setError("");
     setIsLoading(true);
 
     try {
-      await loginAPI({ email, password });
-      // เมื่อล็อกอินสำเร็จ ให้ย้ายหน้าไปที่ Dashboard หรือหน้าหลัก
+      await login({ email, password });
       toast.success("Login Success", { position: "top-center" });
-      setTimeout(() => {
-        router.push("/dashboard");
+
+      const currentUser = await checkCurrentUser();
+      const user = currentUser.data;
+      await setTimeout(() => {
+        if (user.has_account === 0) {
+          router.push("/onboarding");
+        } else {
+          router.push("/dashboard");
+        }
       }, 1000);
     } catch (err: any) {
       toast.error("Something went wrong. Please try again.", {
@@ -59,7 +68,7 @@ export function LoginForm({
 
   return (
     <div className={cn("flex flex-col gap-6", className)} {...props}>
-      <Card className="overflow-hidden p-0 ">
+      <Card className="overflow-hidden p-0 animate-fade-in-down">
         <CardContent className="grid p-0 md:grid-cols-2">
           <form className="p-6 md:p-8" onSubmit={handleLogin}>
             <FieldGroup>
@@ -80,7 +89,6 @@ export function LoginForm({
                 <Input
                   id="email"
                   type="email"
-                  placeholder="m@example.com"
                   required
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
@@ -107,7 +115,11 @@ export function LoginForm({
                 />
               </Field>
               <Field>
-                <Button type="submit" disabled={isLoading}>
+                <Button
+                  type="submit"
+                  disabled={isLoading}
+                  className="cursor-pointer"
+                >
                   {isLoading ? "Logging in..." : "Login"}
                 </Button>
               </Field>
@@ -144,7 +156,7 @@ export function LoginForm({
                 </Button>
               </Field>
               <FieldDescription className="text-center">
-                Don&apos;t have an account? <a href="#">Sign up</a>
+                Don&apos;t have an account? <a href="/register">Sign up</a>
               </FieldDescription>
             </FieldGroup>
           </form>

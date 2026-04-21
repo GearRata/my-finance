@@ -45,3 +45,21 @@ export type UpdateTransaction = {
   note: string;
   transaction_date: string | undefined;
 };
+
+export type SlipOk = {
+  amount: number;
+  transDate: string;
+  transTimestamp: string;
+  sender: {
+    displayName: string;
+    account?: {
+      name?: { th?: string; en?: string };
+    };
+  };
+  receiver: {
+    displayName: string;
+    account?: {
+      name?: { th?: string; en?: string };
+    };
+  };
+};

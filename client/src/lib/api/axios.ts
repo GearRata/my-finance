@@ -24,14 +24,12 @@ const apiClient: AxiosInstance = axios.create({
 apiClient.interceptors.request.use((config: InternalAxiosRequestConfig) => {
   const token = Cookies.get("token");
   if (token) config.headers.Authorization = `Bearer ${token}`;
-  // console.log(`📤 ${config.method?.toUpperCase()} ${config.url}`);
   return config;
 });
 
 // Response Interceptor
 apiClient.interceptors.response.use(
   (response) => {
-    // console.log(`📥 ${response.status} ${response.config.url}`);
     return response;
   },
   (error) => {
