@@ -20,8 +20,11 @@ jobs:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
+      - name: Create Client .env file
+        run: echo "NEXT_PUBLIC_API_URL=/api" > ./client/.env
+
       - name: Build and push Client Image
-        uses: docker/build-push-action@v5
+        uses: docker/build-push-action@v6
         with:
           context: ./client
           file: ./client/Dockerfile
@@ -29,7 +32,7 @@ jobs:
           tags: gearmcc/finance-client:prod
 
       - name: Build and push Server Image
-        uses: docker/build-push-action@v5
+        uses: docker/build-push-action@v6
         with:
           context: ./server
           file: ./server/Dockerfile
