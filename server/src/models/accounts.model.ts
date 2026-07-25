@@ -27,16 +27,16 @@ export const updateAccount = async (
   user_id: number | string,
 ) => {
   const { rows } = await client.query(
-    "UPDATE accounts SET name = $1, balance = $2, user_id = $3, updated_at = NOW() WHERE id = $4 RETURNING *",
-    [name, balance, user_id, id],
+    "UPDATE accounts SET name = $1, balance = $2, updated_at = NOW() WHERE id = $3 AND user_id = $4 RETURNING *",
+    [name, balance, id, user_id],
   );
   return rows[0];
 };
 
-export const deleteAccount = async (id: string | string[]) => {
+export const deleteAccount = async (id: string | string[], user_id: number | string) => {
   const { rows } = await client.query(
-    "DELETE FROM accounts WHERE id = $1 RETURNING *",
-    [id],
+    "DELETE FROM accounts WHERE id = $1 AND user_id = $2 RETURNING *",
+    [id, user_id],
   );
   return rows[0];
 };

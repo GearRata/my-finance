@@ -32,13 +32,19 @@ export function RegisterForm({
     setIsLoading(true);
     if (password !== confirmpass) {
       setError("The passwords do not match.");
+      setIsLoading(false);
+      return;
     }
 
     try {
       await register({ username, email, password });
       toast.success("Created Account Success", { position: "top-center" });
       router.push("/login");
-    } catch (error) {
+    } catch (error: any) {
+      const message =
+        error?.response?.data?.message || "Registration failed. Please try again.";
+      setError(message);
+      toast.error(message, { position: "top-center" });
     } finally {
       setIsLoading(false);
     }

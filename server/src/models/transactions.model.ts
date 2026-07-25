@@ -221,11 +221,19 @@ export const deleteTransaction = async (id: number, user_id: number) => {
 };
 
 export const listBy = async (sort: string, order: string, limit: number) => {
+  // Whitelist allowed values to prevent SQL Injection
+  const ALLOWED_SORT_COLUMNS = ['id', 'amount', 'transaction_date', 'created_at', 'updated_at'];
+  const ALLOWED_ORDER_DIRECTIONS = ['ASC', 'DESC'];
+
+  const safeSort = ALLOWED_SORT_COLUMNS.includes(sort) ? sort : 'created_at';
+  const safeOrder = ALLOWED_ORDER_DIRECTIONS.includes(order.toUpperCase()) ? order.toUpperCase() : 'DESC';
+
   const query = `
             SELECT 
                 *
             FROM transactions
-            ORDER BY ${sort} ${order.toUpperCase()}
+            WHERE deleted_at IS NULL
+            ORDER BY ${safeSort} ${safeOrder}
             LIMIT $1
         `;
   const { rows } = await client.query(query, [limit]);

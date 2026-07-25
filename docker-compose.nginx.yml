@@ -1,0 +1,17 @@
+services:
+
+  nginx:
+    image: nginx:alpine
+    container_name: nginx-prod
+    restart: always
+    ports:
+      - "80:80"
+    volumes:
+      - ./nginx.conf:/etc/nginx/conf.d/default.conf
+    networks:
+      - finance-network
+
+networks:
+  finance-network:
+    name: finance-prod-network
+    driver: bridge

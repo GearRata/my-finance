@@ -16,7 +16,7 @@ RUN npm install
 # Copy Source Code ทั้งหมดไปยัง Working Directory (. ตัวแรกคือ source directory on the host machine, ตัวที่สองคือ destination directory within the container)
 COPY . .
 
-COPY .env.development .env
+
 
 # เปิด port 5000 ให้ Container
 EXPOSE 5000

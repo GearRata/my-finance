@@ -8,6 +8,9 @@ import {
   LogOut,
 } from "lucide-react";
 import { IconDotsVertical } from "@tabler/icons-react";
+import { useRouter } from "next/navigation";
+import { logout } from "@/features/auth/services/auth.services";
+import Cookies from "js-cookie";
 
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
@@ -36,6 +39,19 @@ export function NavUser({
   };
 }) {
   const { isMobile } = useSidebar();
+  const router = useRouter();
+
+  const handleLogout = async () => {
+    try {
+      await logout();
+      Cookies.remove("token");
+      router.push("/login");
+    } catch (error) {
+      // ถ้า logout API fail ก็ clear cookie แล้ว redirect ไปเลย
+      Cookies.remove("token");
+      router.push("/login");
+    }
+  };
 
   return (
     <SidebarMenu>
@@ -94,7 +110,7 @@ export function NavUser({
               </DropdownMenuItem>
             </DropdownMenuGroup>
             <DropdownMenuSeparator />
-            <DropdownMenuItem>
+            <DropdownMenuItem onClick={handleLogout}>
               <LogOut />
               Log out
             </DropdownMenuItem>

@@ -113,29 +113,31 @@ export const login = async (req: Request, res: Response) => {
           // Response ให้เก็บ cookie ไว้บน Browser
           res.cookie("token", token, {
             httpOnly: true,
-            secure: false,
+            secure: false, // ปิดชั่วคราวเพื่อเทสต์บน HTTP (ไม่มีโดเมน HTTPS)
             maxAge: 5 * 60 * 60 * 1000, // 5 hours in milliseconds
             sameSite: "lax",
+            path: "/",
           });
           return sendSuccess(res, payload, "Login Sucess");
         },
       );
     } catch (error: unknown) {
       if (error instanceof Error) {
-        if (error.message === "USER_NOT_FOUND") {
-          return sendFail(res, "User not found", "USER_NOT_FOUND", null, 404);
-        }
-        if (error.message === "USER_DISABLED") {
-          return sendFail(res, "User not enabled", "USER_DISABLED", null, 400);
-        }
-        if (error.message === "INVALID_PASSWORD") {
+        // ใช้ error message เดียวกันเพื่อป้องกัน user enumeration
+        if (
+          error.message === "USER_NOT_FOUND" ||
+          error.message === "INVALID_PASSWORD"
+        ) {
           return sendFail(
             res,
-            "Password is not correct",
-            "INVALID_PASSWORD",
+            "Invalid email or password",
+            "INVALID_CREDENTIALS",
             null,
-            400,
+            401,
           );
+        }
+        if (error.message === "USER_DISABLED") {
+          return sendFail(res, "Account is disabled", "USER_DISABLED", null, 403);
         }
       }
       throw error;
@@ -149,8 +151,9 @@ export const logout = async (req: Request, res: Response) => {
   try {
     res.clearCookie("token", {
       httpOnly: true,
-      secure: false,
+      secure: false, // ปิดชั่วคราวเพื่อเทสต์บน HTTP
       sameSite: "lax",
+      path: "/",
     });
     return sendSuccess(res, null, "Logout Success");
   } catch (error) {

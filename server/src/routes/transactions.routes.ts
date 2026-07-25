@@ -19,7 +19,7 @@ router.get("/transactions/summary", authCheck, summary);
 router.get("/transactions/analytics", authCheck, analytics);
 router.get("/transactions/", authCheck, pagination);
 router.get("/transactions/:limit", authCheck, list);
-router.post("/transactions/scanslip", upload.single("file"), scanslip);
+router.post("/transactions/scanslip", authCheck, upload.single("file"), scanslip);
 router.post("/transactions", authCheck, create);
 router.post("/transactions/search", authCheck, searchFilter);
 router.post("/transactionBy", authCheck, listby);

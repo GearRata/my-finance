@@ -84,6 +84,7 @@ export const total = async (req: Request, res: Response) => {
 export const read = async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
+    const user_id = req.user.id;
 
     if (!id) {
       return sendFail(res, "Id is required", "VALIDATION_ERROR", null, 400);
@@ -101,9 +102,9 @@ export const read = async (req: Request, res: Response) => {
                 ) AS images
             FROM goals
             WHERE
-                goals.id = $1
+                goals.id = $1 AND goals.user_id = $2
         `;
-    const { rows } = await client.query(query, [id]);
+    const { rows } = await client.query(query, [id, user_id]);
     return sendSuccess(res, rows, `Goal ID ${id}`);
   } catch (error) {
     console.log(error);
@@ -192,14 +193,15 @@ export const create = async (req: Request, res: Response) => {
 export const update = async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
-    const { name, target_amount, current_amount, user_id, due_date, images } =
+    const user_id = req.user.id; // ใช้จาก authenticated user เท่านั้น
+    const { name, target_amount, current_amount, due_date, images } =
       req.body;
 
     if (!id) {
       return sendFail(res, "Id is required", "VALIDATION_ERROR", null, 400);
     }
 
-    if (!name || !target_amount || !user_id || !current_amount) {
+    if (!name || !target_amount || !current_amount) {
       return sendFail(
         res,
         "All fields are required",
@@ -209,15 +211,16 @@ export const update = async (req: Request, res: Response) => {
       );
     }
 
-    // clear images
+    // clear images (เฉพาะ goal ที่เป็นของ user นี้)
     await client.query(
       `
             DELETE FROM
                 images
             WHERE 
                 goal_id = $1
+            AND user_id = $2
             `,
-      [id],
+      [id, user_id],
     );
 
     const query = `
@@ -227,11 +230,10 @@ export const update = async (req: Request, res: Response) => {
                 name = $1,
                 target_amount = $2,
                 current_amount = $3,
-                user_id = $4,
                 updated_at = NOW(),
-                due_date = $5
+                due_date = $4
             WHERE 
-                id = $6
+                id = $5 AND user_id = $6
             RETURNING *
         `;
 
@@ -239,9 +241,9 @@ export const update = async (req: Request, res: Response) => {
       name,
       target_amount,
       current_amount,
-      user_id,
       due_date,
       id,
+      user_id,
     ]);
 
     const updateGoal = rows[0];
@@ -286,13 +288,14 @@ export const update = async (req: Request, res: Response) => {
 export const remove = async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
+    const user_id = req.user.id;
     if (!id) {
       return sendFail(res, "Id is required", "VALIDATION_ERROR", null, 400);
     }
 
     const { rows } = await client.query(
-      "DELETE FROM goals WHERE id = $1 RETURNING *",
-      [id],
+      "DELETE FROM goals WHERE id = $1 AND user_id = $2 RETURNING *",
+      [id, user_id],
     );
     const data = rows[0];
 

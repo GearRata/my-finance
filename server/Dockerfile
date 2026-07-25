@@ -31,7 +31,7 @@ COPY package*.json ./
 # npm cache clean = ลบ cache เพื่อลดขนาด Image
 RUN npm ci --omit=dev && npm cache clean --force
 COPY --from=builder /app/dist ./dist
-COPY .env .env
+
 # เปิด port 5000 ให้ Container
 EXPOSE 5000
 

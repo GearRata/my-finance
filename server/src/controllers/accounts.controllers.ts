@@ -42,7 +42,8 @@ export const create = async (req: Request, res: Response) => {
 export const update = async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
-    const { name, balance, user_id } = req.body;
+    const user_id = req.user.id; // ใช้จาก authenticated user เท่านั้น
+    const { name, balance } = req.body;
 
     if (!id) {
       return sendFail(res, "Id is required", "VALIDATION_ERROR", null, 400);
@@ -83,8 +84,9 @@ export const remove = async (req: Request, res: Response) => {
     }
 
     try {
-      // Delete account
-      await AccountService.removeAccount(id);
+      // Delete account (เฉพาะของ user ที่ login)
+      const user_id = req.user.id;
+      await AccountService.removeAccount(id, user_id);
       return sendSuccess(res, null, "Delete Account");
     } catch (error: unknown) {
       if (error instanceof Error) {

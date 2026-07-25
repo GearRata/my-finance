@@ -25,8 +25,8 @@ export const updateAccount = async (
   return account;
 };
 
-export const removeAccount = async (id: string | string[]) => {
-  const account = await AccountModel.deleteAccount(id);
+export const removeAccount = async (id: string | string[], user_id: number | string) => {
+  const account = await AccountModel.deleteAccount(id, user_id);
   if (!account) {
     throw new Error("Account not found");
   }

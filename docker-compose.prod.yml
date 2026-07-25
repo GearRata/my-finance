@@ -1,0 +1,80 @@
+services:
+
+  client-prod:
+    image: gearmcc/finance-client:prod
+    container_name: client-prod
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=production
+      - HOSTNAME=0.0.0.0
+    restart: unless-stopped
+    depends_on:
+      - server-prod
+    networks:
+      - finance-network
+
+  server-prod:
+    image: gearmcc/finance-server:prod
+    container_name: server-prod
+    restart: unless-stopped
+    ports:
+      - "5000:5000"
+    env_file:
+      - ./server/.env
+    environment:
+      - TZ=Asia/Bangkok
+    depends_on:
+      postgres-prod:
+        condition: service_healthy
+    networks:
+      - finance-network
+
+  postgres-prod:
+    image: postgres:latest # To download the latest image
+    container_name: postgres-prod # Name of the container
+    restart: unless-stopped
+    shm_size: 128mb # set shared memory limit when using docker compose
+    env_file:
+      - ./server/.env
+    environment:
+      - TZ=Asia/Bangkok
+    ports:
+      - "5432:5432"
+    volumes:
+      - ./server/src/db/schema.sql:/docker-entrypoint-initdb.d/schema.sql
+      - ./server/src/db/seed.sql:/docker-entrypoint-initdb.d/seed.sql
+      - postgres-prod-data:/var/lib/postgresql/
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U admin -d postgres-prod"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - finance-network
+
+  redis-prod:
+    image: redis:7-alpine
+    container_name: redis-prod
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis-prod-data:/data
+    healthcheck:
+      test: [ "CMD", "redis-cli", "ping" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    command: redis-server --appendonly yes --maxmemory 128mb --maxmemory-policy allkeys-lru
+    networks:
+      - finance-network
+
+volumes:
+  postgres-prod-data:
+  redis-prod-data:
+
+networks:
+  finance-network:
+    name: finance-prod-network
+    driver: bridge
